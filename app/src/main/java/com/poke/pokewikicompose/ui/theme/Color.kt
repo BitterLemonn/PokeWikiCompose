@@ -1,0 +1,68 @@
+package com.poke.pokewikicompose.ui.theme
+
+import androidx.compose.ui.graphics.Color
+
+val Purple200 = Color(0xFFBB86FC)
+val Purple500 = Color(0xFF6200EE)
+val Purple700 = Color(0xFF3700B3)
+val Teal200 = Color(0xFF03DAC5)
+
+val RoyalBlue = Color(0xFF4169E1)
+val BackGround = Color(0xFFEFEFEF)
+val RegisterBlue = Color(0xFF6DBDF6)
+val PokeBallRed = Color(0xFFE95656)
+
+val Generation1 = Color(0xFFCF4376)
+val Generation2 = Color(0xFFE5C94A)
+val Generation3 = Color(0xFF0EBE2D)
+val Generation4 = Color(0xFF2995CF)
+val Generation5 = Color(0xFFF0A39B)
+val Generation6 = Color(0xFFD6D6D8)
+val Generation7 = Color(0xFF5AC8FA)
+val Generation8 = Color(0xFFAC379E)
+
+val Fly = Color(0xFF6699FF)
+val Fire = Color(0xFFFF4422)
+val Psychic = Color(0xFFFF5599)
+val Insect = Color(0xFFAAB722)
+val Rock = Color(0xFFBBAA66)
+val Ghost = Color(0xFF6666BB)
+val Dragon = Color(0xFF7766EE)
+val Ice = Color(0xFF77DDFF)
+val Fight = Color(0xFFBB5544)
+val Evil = Color(0xFF735544)
+val Steel = Color(0xFFAAAABB)
+val Ground = Color(0xFFDDBB55)
+val Fairy = Color(0xFFE1AAE1)
+val Grass = Color(0xFF77CC55)
+val Poison = Color(0xFFAF50C1)
+val Water = Color(0xFF3399FF)
+val General = Color(0xFFBBBBAA)
+val Electric = Color(0xFFFFCC33)
+
+val Spacial = Color(0xFF2266CC)
+
+val PokemonBlack = Color(0xFF3E3E3E)
+val PokemonBlue = Color(0xFF9f9fec)
+val PokemonBrown = Color(0xFFd87844)
+val PokemonGray = Color(0xFFe7e7d8)
+val PokemonGreen = Color(0xFFbdffa3)
+val PokemonPink = Color(0xFFff9cc4)
+val PokemonPurple = Color(0xFFa96ac8)
+val PokemonRed = Color(0xFFff927d)
+val PokemonWhite = Color(0xFFF8F8F8)
+val PokemonYellow = Color(0xFFfae078)
+
+val HP = Color(0xFF8AC654)
+val ATK = Color(0xFFF8D03C)
+val DEF = Color(0xFFD98837)
+val SpicATK = Color(0xFF59C3D0)
+val SpicDEF = Color(0xFF5890CD)
+val SPD = Color(0xFFA456D0)
+
+val Info = Color(0xFF018786)
+val Warn = Color(0xFFD87831)
+val Success = Color(0xFF67BF63)
+val Error = Color(0xFFDD302E)
+
+val profile_edit_user_name = Color(0xFF4C4C4C)

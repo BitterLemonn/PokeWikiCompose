@@ -1,0 +1,41 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">PokewikiCompose</string>
+    <string name="email_hint">请输入邮箱</string>
+    <string name="email_reg_hint">请输入注册邮箱</string>
+    <string name="password_hint">请输入密码</string>
+    <string name="password_reg_hint">请输入登录密码</string>
+    <string name="password_certain_hint" tools:ignore="ExtraTranslation">请确认登录密码</string>
+    <string name="register_now">立即注册</string>
+    <string name="login">登录</string>
+    <string name="register">注册</string>
+
+    <!-- 宝可梦属性 -->
+    <string name="pokemon_type_general">一般</string>
+    <string name="pokemon_type_fly">飞行</string>
+    <string name="pokemon_type_fire">火</string>
+    <string name="pokemon_type_psychic">超能力</string>
+    <string name="pokemon_type_water">水</string>
+    <string name="pokemon_type_insect">虫</string>
+    <string name="pokemon_type_electric">电</string>
+    <string name="pokemon_type_rock">岩石</string>
+    <string name="pokemon_type_grass">草</string>
+    <string name="pokemon_type_ghost">幽灵</string>
+    <string name="pokemon_type_ice">冰</string>
+    <string name="pokemon_type_dragon">龙</string>
+    <string name="pokemon_type_fight">格斗</string>
+    <string name="pokemon_type_evil">恶</string>
+    <string name="pokemon_type_poison">毒</string>
+    <string name="pokemon_type_steel">钢</string>
+    <string name="pokemon_type_ground">地面</string>
+    <string name="pokemon_type_fairy">妖精</string>
+    <!-- 宝可梦世代 -->
+    <string name="pokemon_gen_1">第一世代</string>
+    <string name="pokemon_gen_2">第二世代</string>
+    <string name="pokemon_gen_3">第三世代</string>
+    <string name="pokemon_gen_4">第四世代</string>
+    <string name="pokemon_gen_5">第五世代</string>
+    <string name="pokemon_gen_6">第六世代</string>
+    <string name="pokemon_gen_7">第七世代</string>
+    <string name="pokemon_gen_8">第八世代</string>
+
+</resources>

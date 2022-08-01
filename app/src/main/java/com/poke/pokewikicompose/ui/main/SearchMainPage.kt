@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.pokewiki.bean.PokemonSearchBean
+import com.poke.pokewikicompose.data.bean.PokemonSearchBean
 import com.poke.pokewikicompose.R
 import com.poke.pokewikicompose.ui.theme.PokeBallRed
 import com.poke.pokewikicompose.ui.widget.PokemonSearchCard

@@ -1,4 +1,4 @@
-package com.example.pokewiki.bean
+package com.poke.pokewikicompose.data.bean
 
 data class PokemonStateBean(
     val HP: Int = 0,

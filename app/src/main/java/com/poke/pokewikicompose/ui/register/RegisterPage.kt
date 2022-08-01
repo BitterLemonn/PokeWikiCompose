@@ -5,6 +5,7 @@ import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -12,8 +13,10 @@ import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -25,6 +28,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.poke.pokewikicompose.R
 import com.poke.pokewikicompose.ui.SNACK_ERROR
+import com.poke.pokewikicompose.ui.login.LoginViewAction
 import com.poke.pokewikicompose.ui.popupSnackBar
 import com.poke.pokewikicompose.ui.theme.AppTheme
 import com.poke.pokewikicompose.ui.widget.AuthInputEditText
@@ -32,6 +36,7 @@ import com.poke.pokewikicompose.ui.widget.WarpLoadingDialog
 import com.poke.pokewikicompose.utils.REGISTER_PAGE
 import com.poke.pokewikicompose.utils.SEARCH_MAIN_PAGE
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun RegisterPage(
     viewModel: RegisterViewModel = viewModel(),
@@ -51,6 +56,7 @@ fun RegisterPage(
         }
     }
     val dispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     DisposableEffect(Unit) {
         onDispose {
@@ -72,8 +78,8 @@ fun RegisterPage(
                 is RegisterViewEvent.ShowLoadingDialog -> isShowDialog.value = true
                 is RegisterViewEvent.DismissLoadingDialog -> isShowDialog.value = false
                 is RegisterViewEvent.TransIntent -> {
-                    navCtrl.navigate(SEARCH_MAIN_PAGE){
-                        popUpTo(REGISTER_PAGE){ inclusive = true }
+                    navCtrl.navigate(SEARCH_MAIN_PAGE) {
+                        popUpTo(REGISTER_PAGE) { inclusive = true }
                     }
                 }
             }
@@ -134,6 +140,12 @@ fun RegisterPage(
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
                     imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        keyboardController?.hide()
+                        viewModel.dispatch(RegisterViewAction.OnRegisterClicked)
+                    }
                 )
             )
             Spacer(modifier = Modifier.height(106.dp))
@@ -177,7 +189,7 @@ fun RegisterPage(
     if (isShowDialog.value) {
         WarpLoadingDialog("正在注册")
         dispatcher?.addCallback(callback)
-    }else
+    } else
         callback.remove()
 }
 

@@ -1,4 +1,4 @@
-package com.example.pokewiki.bean
+package com.poke.pokewikicompose.data.bean
 
 data class PokemonIntroBean(
     val intro_text: String? = "",

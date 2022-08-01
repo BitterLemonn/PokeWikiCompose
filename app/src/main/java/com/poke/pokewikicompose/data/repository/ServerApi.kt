@@ -1,7 +1,7 @@
 package com.poke.pokewikicompose.data.repository
 
-import com.example.pokewiki.bean.PokemonDetailBean
-import com.example.pokewiki.bean.PokemonSearchBean
+import com.poke.pokewikicompose.data.bean.PokemonDetailBean
+import com.poke.pokewikicompose.data.bean.PokemonSearchBean
 import com.poke.pokewikicompose.data.bean.UserBean
 import com.poke.pokewikicompose.utils.ResponseData
 import com.poke.pokewikicompose.utils.SERVER_URL

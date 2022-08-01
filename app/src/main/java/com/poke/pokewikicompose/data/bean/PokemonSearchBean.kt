@@ -1,11 +1,13 @@
-package com.example.pokewiki.bean
+package com.poke.pokewikicompose.data.bean
 
-import java.io.File
+import androidx.room.ColumnInfo
+import androidx.room.Entity
 
+@Entity
 data class PokemonSearchBean(
-    val img_path : String = "",
-    val img_url: String = "",
-    val pokemon_id: String = "",
-    val pokemon_name: String = "",
-    val pokemon_type: ArrayList<String> = ArrayList()
+    @ColumnInfo val pokemon_id: String = "",
+    @ColumnInfo val img_path : String = "",
+    @ColumnInfo val img_url: String = "",
+    @ColumnInfo val pokemon_name: String = "",
+    @ColumnInfo val pokemon_type: ArrayList<String> = ArrayList()
 )

@@ -12,6 +12,6 @@ data class UserBean(
     val email: String = "",
     var profile_photo: String? = null,
     val token: String = "",
-    val userId : String = "",
+    val userId: String = "",
     val username: String = ""
 )

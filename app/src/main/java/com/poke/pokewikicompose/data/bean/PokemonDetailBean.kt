@@ -1,14 +1,18 @@
-package com.example.pokewiki.bean
+package com.poke.pokewikicompose.data.bean
 
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+
+@Entity
 data class PokemonDetailBean(
-    val img_url: String = "",
-    var is_star: Int = 0,
-    val pokemon_color: String = "",
-    val pokemon_id : String = "",
-    val pokemon_name : String = "",
-    val pokemon_type : ArrayList<String> = ArrayList(),
+    @ColumnInfo val pokemon_id : String = "",
+    @ColumnInfo val img_url: String = "",
+    @ColumnInfo var is_star: Int = 0,
+    @ColumnInfo val pokemon_color: String = "",
+    @ColumnInfo val pokemon_name : String = "",
+    @ColumnInfo val pokemon_type : ArrayList<String> = ArrayList(),
 
-    val poke_intro : PokemonIntroBean = PokemonIntroBean(),
-    val poke_stat : PokemonStateBean = PokemonStateBean(),
-    val poke_moves : PokemonMovesBean = PokemonMovesBean()
+    @ColumnInfo val poke_intro : PokemonIntroBean = PokemonIntroBean(),
+    @ColumnInfo val poke_stat : PokemonStateBean = PokemonStateBean(),
+    @ColumnInfo val poke_moves : PokemonMovesBean = PokemonMovesBean()
 )

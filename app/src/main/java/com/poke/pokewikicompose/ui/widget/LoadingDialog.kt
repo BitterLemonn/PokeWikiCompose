@@ -1,9 +1,9 @@
 package com.poke.pokewikicompose.ui.widget
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -58,7 +58,19 @@ fun LoadingDialog(
 }
 
 @Composable
+fun WarpLoadingDialog(text: String, size: Int = 120){
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colors.onSurface.copy(alpha = 0.4f)
+    ) {
+        Box(modifier = Modifier.wrapContentSize()) {
+            LoadingDialog("$text...", size)
+        }
+    }
+}
+
+@Composable
 @Preview
 fun LoadingPreview() {
-    LoadingDialog("正在登录...", 120)
+    WarpLoadingDialog("正在登录", 120)
 }

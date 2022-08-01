@@ -1,5 +1,7 @@
 package com.poke.pokewikicompose.ui.register
 
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,11 +12,8 @@ import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -29,6 +28,9 @@ import com.poke.pokewikicompose.ui.SNACK_ERROR
 import com.poke.pokewikicompose.ui.popupSnackBar
 import com.poke.pokewikicompose.ui.theme.AppTheme
 import com.poke.pokewikicompose.ui.widget.AuthInputEditText
+import com.poke.pokewikicompose.ui.widget.WarpLoadingDialog
+import com.poke.pokewikicompose.utils.REGISTER_PAGE
+import com.poke.pokewikicompose.utils.SEARCH_MAIN_PAGE
 
 @Composable
 fun RegisterPage(
@@ -39,17 +41,43 @@ fun RegisterPage(
     val viewStates = viewModel.viewStates
     val coroutineState = rememberCoroutineScope()
 
-    val focusRequester = remember { FocusRequester() }
+    val isShowDialog = remember { mutableStateOf(false) }
 
-    DisposableEffect(Unit){
+    val callback = remember {
+        object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // 拦截返回
+            }
+        }
+    }
+    val dispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+
+    DisposableEffect(Unit) {
         onDispose {
             viewModel.dispatch(RegisterViewAction.UpdateEmail(""))
             viewModel.dispatch(RegisterViewAction.UpdatePassword(""))
             viewModel.dispatch(RegisterViewAction.UpdateCertain(""))
         }
     }
-    LaunchedEffect(Unit){
-        focusRequester.requestFocus()
+
+    LaunchedEffect(Unit) {
+        viewModel.viewEvents.collect {
+            when (it) {
+                is RegisterViewEvent.ShowToast -> popupSnackBar(
+                    coroutineState,
+                    scaffoldState,
+                    label = SNACK_ERROR,
+                    it.msg
+                )
+                is RegisterViewEvent.ShowLoadingDialog -> isShowDialog.value = true
+                is RegisterViewEvent.DismissLoadingDialog -> isShowDialog.value = false
+                is RegisterViewEvent.TransIntent -> {
+                    navCtrl.navigate(SEARCH_MAIN_PAGE){
+                        popUpTo(REGISTER_PAGE){ inclusive = true }
+                    }
+                }
+            }
+        }
     }
 
     Box(
@@ -85,8 +113,7 @@ fun RegisterPage(
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Next
-                ),
-                requester = focusRequester
+                )
             )
             Spacer(modifier = Modifier.height(46.dp))
             AuthInputEditText(
@@ -146,6 +173,12 @@ fun RegisterPage(
             }
         }
     }
+
+    if (isShowDialog.value) {
+        WarpLoadingDialog("正在注册")
+        dispatcher?.addCallback(callback)
+    }else
+        callback.remove()
 }
 
 @Composable

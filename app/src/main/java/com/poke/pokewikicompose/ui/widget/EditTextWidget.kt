@@ -32,11 +32,8 @@ fun AuthInputEditText(
     onValueChange: (String) -> Unit,
     isTransform: Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions(),
-    keyboardActions: KeyboardActions = KeyboardActions(),
-    requester: FocusRequester? = null
+    keyboardActions: KeyboardActions = KeyboardActions()
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
-
     Surface(
         elevation = 10.dp,
         shape = RoundedCornerShape(10.dp),
@@ -46,13 +43,7 @@ fun AuthInputEditText(
     ) {
         TextField(
             modifier = Modifier
-                .padding(vertical = 0.dp)
-                .focusRequester(requester ?: FocusRequester())
-                .onFocusChanged {
-                    if (it.isFocused)
-                        keyboardController?.show()
-                }
-                .focusable(),
+                .padding(vertical = 0.dp),
             colors = TextFieldDefaults
                 .textFieldColors(
                     backgroundColor = Color.Transparent,

@@ -4,10 +4,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.poke.pokewikicompose.data.repository.RegisterRepository
+import com.poke.pokewikicompose.utils.NetworkState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class RegisterViewModel : ViewModel() {
+    private val repository = RegisterRepository.getInstance()
     var viewStates by mutableStateOf(RegisterViewState())
         private set
     private val _viewEvents = Channel<RegisterViewEvent>(Channel.BUFFERED)
@@ -21,16 +27,33 @@ class RegisterViewModel : ViewModel() {
                 viewStates = viewStates.copy(password = viewAction.password)
             is RegisterViewAction.UpdateCertain ->
                 viewStates = viewStates.copy(certain = viewAction.certain)
-            else -> {}
+            is RegisterViewAction.OnRegisterClicked -> register()
         }
     }
 
-    private fun updateEmail(email: String) {
-
+    private fun register() {
+        viewModelScope.launch{
+            flow {
+                registerLogic()
+                emit("注册成功")
+            }.onStart {
+                _viewEvents.send(RegisterViewEvent.ShowLoadingDialog)
+            }.onEach {
+                _viewEvents.send(RegisterViewEvent.DismissLoadingDialog)
+            }.catch {
+                _viewEvents.send(RegisterViewEvent.DismissLoadingDialog)
+                _viewEvents.send(RegisterViewEvent.ShowToast(it.message ?: ""))
+            }.flowOn(Dispatchers.IO).collect()
+        }
     }
 
-    private fun updatePassword(password: String) {
-
+    private suspend fun registerLogic() {
+        when (val result = repository.register(viewStates.email, viewStates.password)) {
+            is NetworkState.Success -> {
+                _viewEvents.send(RegisterViewEvent.TransIntent)
+            }
+            is NetworkState.Error -> throw Exception(result.msg)
+        }
     }
 }
 

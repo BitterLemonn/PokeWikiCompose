@@ -1,5 +1,7 @@
 package com.poke.pokewikicompose.ui.login
 
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,7 +28,7 @@ import com.poke.pokewikicompose.ui.SNACK_ERROR
 import com.poke.pokewikicompose.ui.popupSnackBar
 import com.poke.pokewikicompose.ui.theme.AppTheme
 import com.poke.pokewikicompose.ui.widget.AuthInputEditText
-import com.poke.pokewikicompose.ui.widget.LoadingDialog
+import com.poke.pokewikicompose.ui.widget.WarpLoadingDialog
 import com.poke.pokewikicompose.utils.LOGIN_PAGE
 import com.poke.pokewikicompose.utils.REGISTER_PAGE
 import com.poke.pokewikicompose.utils.SEARCH_MAIN_PAGE
@@ -43,6 +45,15 @@ fun LoginPage(
     val keyboardController = LocalSoftwareKeyboardController.current
 
     val isShowDialog = remember { mutableStateOf(false) }
+
+    val callback = remember {
+        object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // 拦截返回
+            }
+        }
+    }
+    val dispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
     LaunchedEffect(Unit) {
         viewModel.viewEvent.collect {
@@ -192,14 +203,10 @@ fun LoginPage(
     }
 
     if (isShowDialog.value) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colors.onSurface.copy(alpha = 0.4f)
-        ) {
-            Box(modifier = Modifier.wrapContentSize()) {
-                LoadingDialog("正在登录...", 120)
-            }
-        }
+        WarpLoadingDialog("正在登录", 120)
+        dispatcher?.addCallback(callback)
+    }else{
+        callback.remove()
     }
 }
 

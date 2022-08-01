@@ -2,6 +2,7 @@ package com.poke.pokewikicompose.data.repository
 
 import com.example.pokewiki.bean.PokemonSearchBean
 import com.poke.pokewikicompose.utils.NetworkState
+import com.poke.pokewikicompose.utils.UnifiedExceptionHandler
 
 class SearchMainRepository {
     companion object {
@@ -15,17 +16,6 @@ class SearchMainRepository {
     }
 
     suspend fun getAllPokemonWithPage(page: Int): NetworkState<ArrayList<PokemonSearchBean>> {
-        val result = try {
-            ServerApi.create().getAllWithPage(page)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return NetworkState.Error("未知错误，请联系管理员")
-        }
-        result.let {
-            when (it.status) {
-                200 -> return NetworkState.Success(it.data)
-                else -> return NetworkState.Error(it.msg ?: "未知错误，请联系管理员")
-            }
-        }
+        return UnifiedExceptionHandler.handleSuspend { ServerApi.create().getAllWithPage(page) }
     }
 }

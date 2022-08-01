@@ -1,10 +1,9 @@
-package com.poke.pokewikicompose.data.repository
+package com.poke.pokewikicompose.dataBase.data.repository
 
 import android.util.Log
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
-import okhttp3.ResponseBody
 import java.io.IOException
 
 

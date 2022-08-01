@@ -5,7 +5,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.poke.pokewikicompose.data.repository.LoginRepository
+import com.poke.pokewikicompose.dataBase.data.bean.UserBean
+import com.poke.pokewikicompose.dataBase.data.repository.LoginRepository
+import com.poke.pokewikicompose.dataBase.GlobalDataBase
+import com.poke.pokewikicompose.utils.AppContext
 import com.poke.pokewikicompose.utils.NetworkState
 import com.poke.pokewikicompose.utils.md5
 import kotlinx.coroutines.Dispatchers
@@ -21,25 +24,32 @@ class LoginViewModel : ViewModel() {
     private val _viewEvent = Channel<LoginViewEvent>(Channel.BUFFERED)
     val viewEvent = _viewEvent.receiveAsFlow()
 
+    var userResult: UserBean? = null
+
     fun dispatch(viewAction: LoginViewAction) {
         when (viewAction) {
-            is LoginViewAction.UpdateEmail -> updateEmail(viewAction.email)
-            is LoginViewAction.UpdatePassword -> updatePassword(viewAction.password)
+            is LoginViewAction.UpdateEmail ->
+                viewStates = viewStates.copy(email = viewAction.email)
+            is LoginViewAction.UpdatePassword ->
+                viewStates = viewStates.copy(password = viewAction.password)
             is LoginViewAction.ChangeErrorState -> updateErrorState(viewAction.error)
             is LoginViewAction.OnLoginClicked -> login()
+            is LoginViewAction.CheckLoginState -> checkLoginState()
         }
-    }
-
-    private fun updateEmail(email: String) {
-        viewStates = viewStates.copy(email = email)
-    }
-
-    private fun updatePassword(password: String) {
-        viewStates = viewStates.copy(password = password)
     }
 
     private fun updateErrorState(error: Boolean) {
         viewStates = viewStates.copy(error = error)
+    }
+
+    private fun checkLoginState() {
+        val user = GlobalDataBase.database.userDao().getAll()
+        user?.let {
+            viewModelScope.launch {
+                if (it.size == 1)
+                    _viewEvent.send(LoginViewEvent.TransIntent)
+            }
+        }
     }
 
     private fun login() {
@@ -62,17 +72,25 @@ class LoginViewModel : ViewModel() {
         val email = viewStates.email
         val password = viewStates.password
 
-        // 测试
-        if (email == "1" && password == "1")
+        // 测试专用
+        if (email == "1" && password == "1") {
             _viewEvent.send(LoginViewEvent.TransIntent)
-        else
+            val data =
+                UserBean(email = email, token = "123123123", userId = "1", username = "宝可梦训练师")
+            //写入全局
+            AppContext.userData = data
+            //临时保存
+            userResult = data
+        } else
+        // 正常流程
             when (val result = repository.getAuth(email, md5(password))) {
                 is NetworkState.Success -> {
                     _viewEvent.send(LoginViewEvent.TransIntent)
-//                //写入全局
-//                AppContext.userData = result.data
-//                //写入内存
-//                sp.edit().putString(USER_DATA, Gson().toJson(result.data)).apply()
+                    //写入全局
+                    AppContext.userData = result.data
+                    //Room持久化
+                    GlobalDataBase.database.userDao().deleteAll()
+                    GlobalDataBase.database.userDao().insert(result.data)
                 }
                 is NetworkState.Error -> throw Exception(result.msg)
             }
@@ -94,6 +112,7 @@ sealed class LoginViewAction {
     data class UpdateEmail(val email: String) : LoginViewAction()
     data class UpdatePassword(val password: String) : LoginViewAction()
     data class ChangeErrorState(val error: Boolean) : LoginViewAction()
+    object CheckLoginState : LoginViewAction()
 }
 
 sealed class LoginViewEvent {

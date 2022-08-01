@@ -1,8 +1,8 @@
-package com.poke.pokewikicompose.data.repository
+package com.poke.pokewikicompose.dataBase.data.repository
 
-import com.poke.pokewikicompose.data.bean.PokemonDetailBean
-import com.poke.pokewikicompose.data.bean.PokemonSearchBean
-import com.poke.pokewikicompose.data.bean.UserBean
+import com.poke.pokewikicompose.dataBase.data.bean.PokemonDetailBean
+import com.poke.pokewikicompose.dataBase.data.bean.PokemonSearchBean
+import com.poke.pokewikicompose.dataBase.data.bean.UserBean
 import com.poke.pokewikicompose.utils.ResponseData
 import com.poke.pokewikicompose.utils.SERVER_URL
 import okhttp3.MultipartBody

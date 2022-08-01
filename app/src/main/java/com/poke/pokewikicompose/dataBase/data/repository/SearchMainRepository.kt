@@ -1,6 +1,6 @@
-package com.poke.pokewikicompose.data.repository
+package com.poke.pokewikicompose.dataBase.data.repository
 
-import com.poke.pokewikicompose.data.bean.PokemonSearchBean
+import com.poke.pokewikicompose.dataBase.data.bean.PokemonSearchBean
 import com.poke.pokewikicompose.utils.NetworkState
 import com.poke.pokewikicompose.utils.UnifiedExceptionHandler
 

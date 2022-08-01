@@ -5,8 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.poke.pokewikicompose.data.bean.PokemonSearchBean
-import com.poke.pokewikicompose.data.repository.SearchMainRepository
+import com.poke.pokewikicompose.dataBase.data.bean.PokemonSearchBean
+import com.poke.pokewikicompose.dataBase.data.repository.SearchMainRepository
 import com.poke.pokewikicompose.utils.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*

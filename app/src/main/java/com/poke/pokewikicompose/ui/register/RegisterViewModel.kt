@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.poke.pokewikicompose.data.repository.RegisterRepository
+import com.poke.pokewikicompose.dataBase.data.repository.RegisterRepository
 import com.poke.pokewikicompose.utils.NetworkState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel

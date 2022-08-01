@@ -4,8 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.poke.pokewikicompose.R
+import com.poke.pokewikicompose.dataBase.data.bean.UserBean
 import com.poke.pokewikicompose.ui.theme.*
 
+// 导航
 const val COVER_PAGE = "COVER_PAGE"
 const val LOGIN_PAGE = "LOGIN_PAGE"
 const val REGISTER_PAGE = "REGISTER_PAGE"
@@ -20,6 +22,10 @@ const val INIT = 0
 const val LOADING = 10000
 const val SUCCESS = 20001
 const val ERROR = -1
+
+//sp
+const val SHARED_KEY = "POKE_WIKI_SHARED_KEY"
+const val USER_DATA = "USER_DATA"
 
 @Composable
 fun GetColorByText(text: String): Color {
@@ -54,4 +60,8 @@ fun GetColorByText(text: String): Color {
 
         else -> PokeBallRed
     }
+}
+
+object AppContext {
+    var userData = UserBean()
 }

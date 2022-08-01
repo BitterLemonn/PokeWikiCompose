@@ -1,4 +1,4 @@
-package com.poke.pokewikicompose.data.bean
+package com.poke.pokewikicompose.dataBase.data.bean
 
 data class PokemonMovesBean(
     val moves: ArrayList<PokemonMoveBean> = ArrayList()

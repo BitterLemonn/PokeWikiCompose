@@ -1,5 +1,6 @@
 package com.poke.pokewikicompose.ui.login
 
+import android.content.SharedPreferences
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.Image
@@ -32,6 +33,7 @@ import com.poke.pokewikicompose.ui.widget.WarpLoadingDialog
 import com.poke.pokewikicompose.utils.LOGIN_PAGE
 import com.poke.pokewikicompose.utils.REGISTER_PAGE
 import com.poke.pokewikicompose.utils.SEARCH_MAIN_PAGE
+import kotlinx.coroutines.currentCoroutineContext
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -56,6 +58,7 @@ fun LoginPage(
     val dispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
     LaunchedEffect(Unit) {
+        viewModel.dispatch(LoginViewAction.CheckLoginState)
         viewModel.viewEvent.collect {
             when (it) {
                 is LoginViewEvent.ShowToast ->

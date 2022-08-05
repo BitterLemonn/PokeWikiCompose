@@ -21,7 +21,7 @@ import coil.request.ImageRequest
 import com.poke.pokewikicompose.R
 
 @Composable
-fun LoadingDialog(
+private fun LoadingDialog(
     text: String,
     dialogSize: Int
 ) {
@@ -58,10 +58,14 @@ fun LoadingDialog(
 }
 
 @Composable
-fun WarpLoadingDialog(text: String, size: Int = 120){
+fun WarpLoadingDialog(
+    text: String,
+    size: Int = 120,
+    alpha: Float = 0.4f
+) {
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colors.onSurface.copy(alpha = 0.4f)
+        color = MaterialTheme.colors.onSurface.copy(alpha = alpha)
     ) {
         Box(modifier = Modifier.wrapContentSize()) {
             LoadingDialog("$text...", size)
@@ -71,6 +75,6 @@ fun WarpLoadingDialog(text: String, size: Int = 120){
 
 @Composable
 @Preview
-fun LoadingPreview() {
+private fun LoadingPreview() {
     WarpLoadingDialog("正在登录", 120)
 }

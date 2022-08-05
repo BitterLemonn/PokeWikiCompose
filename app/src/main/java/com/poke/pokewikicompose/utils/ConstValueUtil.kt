@@ -6,6 +6,8 @@ import androidx.compose.ui.res.stringResource
 import com.poke.pokewikicompose.R
 import com.poke.pokewikicompose.dataBase.data.bean.UserBean
 import com.poke.pokewikicompose.ui.theme.*
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
 
 // 导航
 const val COVER_PAGE = "COVER_PAGE"
@@ -62,6 +64,22 @@ fun GetColorByText(text: String): Color {
     }
 }
 
+object JsonConverter{
+    @OptIn(ExperimentalSerializationApi::class)
+    val Json: Json = Json {
+        ignoreUnknownKeys = true
+        explicitNulls = false
+        encodeDefaults = true
+        explicitNulls = false
+    }
+}
+
 object AppContext {
-    var userData = UserBean()
+    var userData = UserBean(
+        userId = "",
+        email = "",
+        profile_photo = null,
+        token = "",
+        username = ""
+    )
 }

@@ -1,4 +1,4 @@
-package com.poke.pokewikicompose.ui.main
+package com.poke.pokewikicompose.ui.searchMain
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -9,6 +9,7 @@ import com.poke.pokewikicompose.dataBase.data.bean.PokemonSearchBean
 import com.poke.pokewikicompose.dataBase.data.repository.SearchMainRepository
 import com.poke.pokewikicompose.utils.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -21,9 +22,35 @@ class SearchMainViewModel : ViewModel() {
 
     fun dispatch(viewAction: SearchMainViewAction) {
         when (viewAction) {
+            is SearchMainViewAction.GetDataWithStateTest -> getDataWithPageTest(viewAction.isRefresh)
             is SearchMainViewAction.GetDataWithState -> getDataWithPage(viewAction.isRefresh)
             is SearchMainViewAction.ResetLoadingState -> viewStates =
                 viewStates.copy(loadingState = INIT)
+
+        }
+    }
+
+    private fun getDataWithPageTest(isRefresh: Boolean) {
+        val searchItems = ArrayList<PokemonSearchBean>()
+        val typeArrayList = ArrayList<String>()
+        typeArrayList.add("草")
+        typeArrayList.add("毒")
+        for (i in 0 until 10) {
+            searchItems.add(
+                PokemonSearchBean(
+                    img_url = "https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/3.png",
+                    pokemon_name = "妙蛙花",
+                    pokemon_id = "#003",
+                    pokemon_type = typeArrayList,
+                    img_path = ""
+                )
+            )
+        }
+        viewModelScope.launch {
+            _viewEvent.send(SearchMainViewEvent.ShowLoadingDialog)
+            delay(1_000)
+            _viewEvent.send(SearchMainViewEvent.DismissLoadingDialog)
+            _viewEvent.send(SearchMainViewEvent.UpdateData(searchItems))
         }
     }
 
@@ -31,7 +58,6 @@ class SearchMainViewModel : ViewModel() {
         viewModelScope.launch {
             flow {
                 if (isRefresh) viewStates = viewStates.copy(page = 1)
-
                 getDataWithPageLogic()
                 emit("获取成功")
             }.onStart {
@@ -63,6 +89,7 @@ data class SearchMainViewState(
 sealed class SearchMainViewAction {
     data class GetDataWithState(val isRefresh: Boolean) : SearchMainViewAction()
     object ResetLoadingState : SearchMainViewAction()
+    data class GetDataWithStateTest(val isRefresh: Boolean) : SearchMainViewAction()
 }
 
 sealed class SearchMainViewEvent {

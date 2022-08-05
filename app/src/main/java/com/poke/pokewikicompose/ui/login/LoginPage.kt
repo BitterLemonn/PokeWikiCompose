@@ -58,7 +58,6 @@ fun LoginPage(
     val dispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
     LaunchedEffect(Unit) {
-        viewModel.dispatch(LoginViewAction.CheckLoginState)
         viewModel.viewEvent.collect {
             when (it) {
                 is LoginViewEvent.ShowToast ->

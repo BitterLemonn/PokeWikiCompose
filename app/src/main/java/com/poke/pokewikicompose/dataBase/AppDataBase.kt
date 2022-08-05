@@ -1,4 +1,4 @@
-package com.poke.pokewikicompose.dataBase.db
+package com.poke.pokewikicompose.dataBase
 
 import android.content.Context
 import androidx.room.Database

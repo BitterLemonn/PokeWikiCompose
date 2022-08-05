@@ -20,7 +20,7 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.poke.pokewikicompose.ui.AppSnackBar
 import com.poke.pokewikicompose.ui.cover.CoverPage
 import com.poke.pokewikicompose.ui.login.LoginPage
-import com.poke.pokewikicompose.ui.main.SearchMainPage
+import com.poke.pokewikicompose.ui.searchMain.SearchMainPage
 import com.poke.pokewikicompose.ui.register.RegisterPage
 import com.poke.pokewikicompose.utils.COVER_PAGE
 import com.poke.pokewikicompose.utils.LOGIN_PAGE

@@ -116,7 +116,8 @@ fun preview() {
             img_url = "",
             pokemon_id = "#003",
             pokemon_type = typeArrayList,
-            pokemon_name = "妙蛙花"
+            pokemon_name = "妙蛙花",
+            img_path = ""
         )
     )
 }

@@ -1,17 +1,15 @@
-package com.poke.pokewikicompose.ui.main
+package com.poke.pokewikicompose.ui.searchMain
 
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,11 +21,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.poke.pokewikicompose.dataBase.data.bean.PokemonSearchBean
 import com.poke.pokewikicompose.R
+import com.poke.pokewikicompose.dataBase.data.bean.PokemonSearchBean
 import com.poke.pokewikicompose.ui.theme.PokeBallRed
-import com.poke.pokewikicompose.ui.widget.PokemonSearchCard
 import com.poke.pokewikicompose.ui.widget.PokeBallSearchBar
+import com.poke.pokewikicompose.ui.widget.PokemonSearchCard
+import com.poke.pokewikicompose.ui.widget.WarpLoadingDialog
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ExperimentalToolbarApi
 import me.onebone.toolbar.ScrollStrategy
@@ -41,29 +40,26 @@ fun SearchMainPage(
     viewModel: SearchMainViewModel = viewModel()
 ) {
     val viewStates = viewModel.viewStates
-    val coroutineState = rememberCoroutineScope()
-    val searchItems = remember { ArrayList<PokemonSearchBean>() }
+    val searchItems = remember { mutableStateListOf<PokemonSearchBean>() }
+    val loading = remember { mutableStateOf(false) }
 
     val collapsingState = rememberCollapsingToolbarScaffoldState()
     val progress = collapsingState.toolbarState.progress
 
     LaunchedEffect(Unit) {
-//        viewModel.dispatch(SearchMainViewAction.GetDataWithState(false))
-        val typeArrayList = ArrayList<String>()
-        typeArrayList.add("草")
-        typeArrayList.add("毒")
-        for (i in 0..100) {
-            searchItems.add(
-                PokemonSearchBean(
-                    img_url = "https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/3.png",
-                    pokemon_name = "妙蛙花",
-                    pokemon_id = "#003",
-                    pokemon_type = typeArrayList
-                )
-            )
+        viewModel.dispatch(SearchMainViewAction.GetDataWithStateTest(false))
+        viewModel.viewEvent.collect {
+            when (it) {
+                is SearchMainViewEvent.UpdateData -> {
+                    searchItems.clear()
+                    searchItems.addAll(it.pokemonDataList)
+                }
+                is SearchMainViewEvent.ShowLoadingDialog -> loading.value = true
+                is SearchMainViewEvent.DismissLoadingDialog -> loading.value = false
+                else -> {}
+            }
         }
     }
-
     CollapsingToolbarScaffold(
         modifier = Modifier,
         state = collapsingState,
@@ -117,26 +113,25 @@ fun SearchMainPage(
                     onValueChange = {
                         // TODO
                     },
-                    onClick = { Log.e("", "SearchMainPage: 点击了搜索")}
+                    onClick = { Log.e("", "SearchMainPage: 点击了搜索") }
                 )
             }
 
-
         }
     ) {
+        if (loading.value)
+            WarpLoadingDialog(text = "正在加载", alpha = 0.1f)
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
             contentPadding = PaddingValues(vertical = 10.dp, horizontal = 5.dp),
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
             if (searchItems.size > 0)
-                for (item in searchItems) {
-                    item {
-                        PokemonSearchCard(item)
-                        Spacer(Modifier.height(10.dp))
-                    }
+                items(searchItems) {
+                    PokemonSearchCard(it)
+                    Spacer(Modifier.height(10.dp))
                 }
-            else
+            else if (!loading.value)
                 item {
                     Text(
                         text = "暂无相关搜索结果~",

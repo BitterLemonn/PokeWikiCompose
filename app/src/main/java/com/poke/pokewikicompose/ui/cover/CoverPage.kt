@@ -20,46 +20,65 @@ import androidx.navigation.NavController
 import com.poke.pokewikicompose.R
 import com.poke.pokewikicompose.utils.COVER_PAGE
 import com.poke.pokewikicompose.utils.LOGIN_PAGE
+import com.poke.pokewikicompose.utils.SEARCH_MAIN_PAGE
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun CoverPage(
     navController: NavController,
-    skipType: String = "Cover"
+    skipType: String = "Cover",
+    viewModel: CoverViewModel = CoverViewModel()
 ) {
     var second by remember { mutableStateOf(3) }
+    var overProcess by remember { mutableStateOf(false) }
+    var hadUserInfo by remember { mutableStateOf(false) }
     // 计时器
     LaunchedEffect(Unit) {
+        viewModel.checkUserInfo()
+        this.launch {
+            viewModel.viewEvent.collect {
+                when(it){
+                    is CoverViewEvent.OverProcess -> overProcess = true
+                    is CoverViewEvent.GetLoginInfo -> hadUserInfo = true
+                }
+            }
+        }
         while (second != 0) {
             delay(1000)
             second -= 1
         }
-        onSkipClick(skipType = skipType, navController = navController)
+        onSkipClick(skipType = skipType, navController = navController, hadUserInfo = hadUserInfo)
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .background(color = Color.Black)
     ) {
-        Button(
-            border = BorderStroke(1.dp, Color.White),
-            shape = RoundedCornerShape(10.dp),
-            modifier = Modifier
-                .align(Alignment.End)
-                .padding(end = 10.dp, top = 10.dp),
-            onClick = {
-                onSkipClick(skipType = skipType, navController = navController)
-            },
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color.Transparent,
-                contentColor = MaterialTheme.colors.surface
-            ),
-        ) {
-            Text(
-                text = if (second != 0) "跳过 ${second}s" else "跳过",
-                fontSize = 18.sp
-            )
-        }
+        if (overProcess)
+            Button(
+                border = BorderStroke(1.dp, Color.White),
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier
+                    .padding(end = 10.dp, top = 10.dp)
+                    .align(Alignment.TopEnd),
+                onClick = {
+                    onSkipClick(
+                        skipType = skipType,
+                        navController = navController,
+                        hadUserInfo = hadUserInfo
+                    )
+                },
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = Color.Transparent,
+                    contentColor = MaterialTheme.colors.surface
+                ),
+            ) {
+                Text(
+                    text = if (second != 0) "跳过 ${second}s" else "跳过",
+                    fontSize = 18.sp
+                )
+            }
         Column(
             modifier = Modifier
                 .fillMaxSize(),
@@ -84,9 +103,15 @@ fun CoverPage(
     }
 }
 
-fun onSkipClick(navController: NavController, skipType: String) {
-    if (skipType == "Cover")
-        navController.navigate(route = LOGIN_PAGE) {
-            popUpTo(COVER_PAGE) { inclusive = true }
-        }
+fun onSkipClick(navController: NavController, skipType: String, hadUserInfo: Boolean) {
+    if (skipType == "Cover") {
+        if (!hadUserInfo)
+            navController.navigate(route = LOGIN_PAGE) {
+                popUpTo(COVER_PAGE) { inclusive = true }
+            }
+        else
+            navController.navigate(route = SEARCH_MAIN_PAGE) {
+                popUpTo(COVER_PAGE) { inclusive = true }
+            }
+    }
 }

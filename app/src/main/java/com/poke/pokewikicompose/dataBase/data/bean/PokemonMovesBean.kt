@@ -1,16 +1,28 @@
 package com.poke.pokewikicompose.dataBase.data.bean
 
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.TypeConverters
+import com.poke.pokewikicompose.dataBase.data.PokemonMoveArrayConverter
+import com.poke.pokewikicompose.dataBase.data.StringArrayConverter
+import kotlinx.serialization.Serializable
+
+@Serializable
+@Entity
+@TypeConverters(PokemonMoveArrayConverter::class)
 data class PokemonMovesBean(
-    val moves: ArrayList<PokemonMoveBean> = ArrayList()
+    @ColumnInfo val moves: ArrayList<PokemonMoveBean> = ArrayList()
 )
 
+@Serializable
+@Entity
 data class PokemonMoveBean(
-    val accuracy: Int? = 0,
-    val damage_type: String = "",
-    val level: Int? = null,
-    val move_id: Int = 0,
-    val move_name: String = "",
-    val power: Int? = 0,
-    val pp: Int = 0,
-    val type_name: String = ""
+    @ColumnInfo val accuracy: Int? = 0,
+    @ColumnInfo val damage_type: String = "",
+    @ColumnInfo val level: Int? = null,
+    @ColumnInfo val move_id: Int = 0,
+    @ColumnInfo val move_name: String = "",
+    @ColumnInfo val power: Int? = 0,
+    @ColumnInfo val pp: Int = 0,
+    @ColumnInfo val type_name: String = ""
 )

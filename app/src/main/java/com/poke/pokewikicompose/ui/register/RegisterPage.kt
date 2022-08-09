@@ -28,13 +28,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.poke.pokewikicompose.R
 import com.poke.pokewikicompose.ui.SNACK_ERROR
-import com.poke.pokewikicompose.ui.login.LoginViewAction
 import com.poke.pokewikicompose.ui.popupSnackBar
 import com.poke.pokewikicompose.ui.theme.AppTheme
 import com.poke.pokewikicompose.ui.widget.AuthInputEditText
 import com.poke.pokewikicompose.ui.widget.WarpLoadingDialog
+import com.poke.pokewikicompose.utils.MAIN_PAGE
 import com.poke.pokewikicompose.utils.REGISTER_PAGE
-import com.poke.pokewikicompose.utils.SEARCH_MAIN_PAGE
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -78,7 +77,7 @@ fun RegisterPage(
                 is RegisterViewEvent.ShowLoadingDialog -> isShowDialog.value = true
                 is RegisterViewEvent.DismissLoadingDialog -> isShowDialog.value = false
                 is RegisterViewEvent.TransIntent -> {
-                    navCtrl.navigate(SEARCH_MAIN_PAGE) {
+                    navCtrl.navigate(MAIN_PAGE) {
                         popUpTo(REGISTER_PAGE) { inclusive = true }
                     }
                 }

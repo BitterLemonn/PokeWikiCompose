@@ -20,7 +20,7 @@ import androidx.navigation.NavController
 import com.poke.pokewikicompose.R
 import com.poke.pokewikicompose.utils.COVER_PAGE
 import com.poke.pokewikicompose.utils.LOGIN_PAGE
-import com.poke.pokewikicompose.utils.SEARCH_MAIN_PAGE
+import com.poke.pokewikicompose.utils.MAIN_PAGE
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -38,7 +38,7 @@ fun CoverPage(
         viewModel.checkUserInfo()
         this.launch {
             viewModel.viewEvent.collect {
-                when(it){
+                when (it) {
                     is CoverViewEvent.OverProcess -> overProcess = true
                     is CoverViewEvent.GetLoginInfo -> hadUserInfo = true
                 }
@@ -110,7 +110,7 @@ fun onSkipClick(navController: NavController, skipType: String, hadUserInfo: Boo
                 popUpTo(COVER_PAGE) { inclusive = true }
             }
         else
-            navController.navigate(route = SEARCH_MAIN_PAGE) {
+            navController.navigate(route = MAIN_PAGE) {
                 popUpTo(COVER_PAGE) { inclusive = true }
             }
     }

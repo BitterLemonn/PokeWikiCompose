@@ -61,7 +61,7 @@ fun SearchMainPage(
         }
     }
     CollapsingToolbarScaffold(
-        modifier = Modifier,
+        modifier = Modifier.fillMaxSize(),
         state = collapsingState,
         scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
         toolbar = {

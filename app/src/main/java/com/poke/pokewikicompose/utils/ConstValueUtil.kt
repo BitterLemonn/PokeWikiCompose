@@ -13,6 +13,7 @@ import kotlinx.serialization.json.Json
 const val COVER_PAGE = "COVER_PAGE"
 const val LOGIN_PAGE = "LOGIN_PAGE"
 const val REGISTER_PAGE = "REGISTER_PAGE"
+const val MAIN_PAGE = "MAIN_PAGE"
 const val SEARCH_MAIN_PAGE = "SEARCH_MAIN_PAGE"
 
 // 服务器地址

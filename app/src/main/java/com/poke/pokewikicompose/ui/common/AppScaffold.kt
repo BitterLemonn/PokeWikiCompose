@@ -2,11 +2,15 @@ package com.poke.pokewikicompose.ui.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -14,18 +18,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.insets.navigationBarsPadding
-import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.orhanobut.logger.Logger
 import com.poke.pokewikicompose.ui.AppSnackBar
 import com.poke.pokewikicompose.ui.cover.CoverPage
 import com.poke.pokewikicompose.ui.login.LoginPage
-import com.poke.pokewikicompose.ui.searchMain.SearchMainPage
+import com.poke.pokewikicompose.ui.main.MainPage
 import com.poke.pokewikicompose.ui.register.RegisterPage
-import com.poke.pokewikicompose.utils.COVER_PAGE
-import com.poke.pokewikicompose.utils.LOGIN_PAGE
-import com.poke.pokewikicompose.utils.SEARCH_MAIN_PAGE
-import com.poke.pokewikicompose.utils.REGISTER_PAGE
+import com.poke.pokewikicompose.ui.searchMain.SearchMainPage
+import com.poke.pokewikicompose.utils.*
 
 @Composable
 fun AppScaffold() {
@@ -33,6 +34,12 @@ fun AppScaffold() {
     val scaffoldState = rememberScaffoldState()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+
+    val mainPageList = listOf<@Composable () -> Unit>(
+        {},
+        { SearchMainPage(navController, scaffoldState) },
+        {}
+    )
 
     Scaffold(
         modifier = Modifier
@@ -46,11 +53,12 @@ fun AppScaffold() {
                 AppSnackBar(data = data)
             }
         }
-    ) {
+    ) { padding ->
         NavHost(
             modifier = Modifier
                 .background(color = Color(0xFFEFEFEF))
-                .fillMaxSize(),
+                .fillMaxSize()
+                .padding(padding),
             navController = navController,
             startDestination = COVER_PAGE
         ) {
@@ -71,6 +79,18 @@ fun AppScaffold() {
                     Color(0xFFEFEFEF), darkIcons = MaterialTheme.colors.isLight
                 )
                 RegisterPage(navCtrl = navController, scaffoldState = scaffoldState)
+            }
+            composable(
+                route = MAIN_PAGE,
+            ) {
+                rememberSystemUiController().setNavigationBarColor(
+                    Color(0xFFEFEFEF), darkIcons = MaterialTheme.colors.isLight
+                )
+                MainPage(
+                    navCtrl = navController,
+                    scaffoldState = scaffoldState,
+                    mainPageList = mainPageList
+                )
             }
             composable(
                 route = SEARCH_MAIN_PAGE,

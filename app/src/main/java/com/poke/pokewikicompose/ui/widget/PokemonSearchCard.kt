@@ -3,6 +3,7 @@ package com.poke.pokewikicompose.ui.widget
 import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -88,14 +89,14 @@ fun PokemonSearchCard(
                         .align(Alignment.CenterVertically)
                         .weight(1f),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    horizontalArrangement = Arrangement.End
                 ) {
-                    for (type in item.pokemon_type) {
-                        item {
-                            PokemonTag(text = type, isColored = true)
-                        }
+                    items(item.pokemon_type){
+                        Spacer(modifier = Modifier.width(10.dp))
+                        PokemonTag(text = it, isColored = true)
                     }
                     item {
+                        Spacer(modifier = Modifier.width(10.dp))
                         PokemonTag(text = item.pokemon_id)
                     }
                 }
@@ -114,7 +115,7 @@ fun preview() {
     PokemonSearchCard(
         PokemonSearchBean(
             img_url = "",
-            pokemon_id = "#003",
+            pokemon_id = "3",
             pokemon_type = typeArrayList,
             pokemon_name = "妙蛙花",
             img_path = ""

@@ -5,7 +5,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.poke.pokewikicompose.dataBase.GlobalDataBase
 import com.poke.pokewikicompose.dataBase.data.repository.RegisterRepository
+import com.poke.pokewikicompose.utils.AppContext
 import com.poke.pokewikicompose.utils.NetworkState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -51,8 +53,14 @@ class RegisterViewModel : ViewModel() {
         when (val result = repository.register(viewStates.email, viewStates.password)) {
             is NetworkState.Success -> {
                 _viewEvents.send(RegisterViewEvent.TransIntent)
+                //写入全局
+                AppContext.userData = result.data
+                //Room持久化
+                GlobalDataBase.database.userDao().deleteAll()
+                GlobalDataBase.database.userDao().insert(result.data)
             }
             is NetworkState.Error -> throw Exception(result.msg)
+            is NetworkState.NoNeedResponse -> throw Exception(result.msg)
         }
     }
 }

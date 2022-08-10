@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id "org.jetbrains.kotlin.kapt"
     id 'org.jetbrains.kotlin.plugin.serialization'
+    id 'kotlin-parcelize'
 }
 
 android {
@@ -88,6 +89,4 @@ dependencies {
     implementation "com.google.accompanist:accompanist-pager:0.26.0-alpha"
     // Compose下拉刷新框架
     implementation "com.google.accompanist:accompanist-swiperefresh:0.26.0-alpha"
-    // Compose Paging3
-    implementation "androidx.paging:paging-compose:1.0.0-alpha15"
 }

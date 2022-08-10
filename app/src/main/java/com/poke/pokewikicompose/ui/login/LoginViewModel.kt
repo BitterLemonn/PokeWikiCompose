@@ -70,7 +70,7 @@ class LoginViewModel : ViewModel() {
                 UserBean(
                     email = email,
                     token = "123123123",
-                    userId = "1",
+                    userId = 1,
                     username = "宝可梦训练师",
                     profile_photo = null
                 )
@@ -89,6 +89,7 @@ class LoginViewModel : ViewModel() {
                     GlobalDataBase.database.userDao().deleteAll()
                     GlobalDataBase.database.userDao().insert(result.data)
                 }
+                is NetworkState.NoNeedResponse -> throw Exception(result.msg)
                 is NetworkState.Error -> throw Exception(result.msg)
             }
     }

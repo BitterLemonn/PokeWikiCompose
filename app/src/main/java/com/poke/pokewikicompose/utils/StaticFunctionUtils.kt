@@ -1,10 +1,6 @@
 package com.poke.pokewikicompose.utils
 
 import android.content.Context
-import android.graphics.Color
-import android.view.View
-import android.view.Window
-import android.view.WindowManager
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 

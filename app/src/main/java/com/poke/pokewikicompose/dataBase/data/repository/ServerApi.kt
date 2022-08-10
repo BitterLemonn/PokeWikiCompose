@@ -5,6 +5,7 @@ import com.poke.pokewikicompose.dataBase.data.bean.PokemonDetailBean
 import com.poke.pokewikicompose.dataBase.data.bean.PokemonSearchBean
 import com.poke.pokewikicompose.dataBase.data.bean.UserBean
 import com.poke.pokewikicompose.utils.JsonConverter.Json
+import com.poke.pokewikicompose.utils.NullableResponseData
 import com.poke.pokewikicompose.utils.ResponseData
 import com.poke.pokewikicompose.utils.SERVER_URL
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -26,14 +27,14 @@ interface ServerApi {
     suspend fun getAuth(
         @Field("email") email: String,
         @Field("password") password: String
-    ): ResponseData<UserBean>
+    ): NullableResponseData<UserBean>
 
     @POST("reg")
     @FormUrlEncoded
     suspend fun register(
         @Field("email") email: String,
         @Field("password") password: String
-    ): ResponseData<UserBean>
+    ): NullableResponseData<UserBean>
 
     @POST("selectAllPokeIntro")
     @FormUrlEncoded

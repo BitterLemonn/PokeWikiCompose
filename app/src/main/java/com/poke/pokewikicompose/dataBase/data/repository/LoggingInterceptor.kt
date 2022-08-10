@@ -4,6 +4,7 @@ import android.util.Log
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
+import okhttp3.ResponseBody
 import java.io.IOException
 
 
@@ -27,7 +28,7 @@ class LoggingInterceptor : Interceptor {
             )
         )
         //拆包 正式运行须注释起来
-//        Log.e("TAG", "拆包！！: ${(response.body() as ResponseBody).string()}")
+//        Log.e("TAG", "拆包！！: ${(response.body as ResponseBody).string()}")
         return response
     }
 }

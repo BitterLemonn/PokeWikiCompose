@@ -17,7 +17,7 @@ const val MAIN_PAGE = "MAIN_PAGE"
 const val SEARCH_MAIN_PAGE = "SEARCH_MAIN_PAGE"
 
 // 服务器地址
-const val SERVER_URL = "http://192.168.128.34:8080/v1/"
+const val SERVER_URL = "http://192.168.2.12:8080/v1/"
 const val DOWNLOAD_URL = "http://192.168.128.34:8080/image/"
 
 // 信号
@@ -70,14 +70,14 @@ object JsonConverter{
     val Json: Json = Json {
         ignoreUnknownKeys = true
         explicitNulls = false
-        encodeDefaults = true
+        encodeDefaults = false
         explicitNulls = false
     }
 }
 
 object AppContext {
     var userData = UserBean(
-        userId = "",
+        userId = 0,
         email = "",
         profile_photo = null,
         token = "",

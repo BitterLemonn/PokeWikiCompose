@@ -5,20 +5,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
+import com.orhanobut.logger.Logger
 import com.poke.pokewikicompose.dataBase.data.bean.PokemonSearchBean
-import com.poke.pokewikicompose.dataBase.data.bean.PokemonSearchPagingResource
-import com.poke.pokewikicompose.dataBase.data.bean.PokemonSearchPagingResourceTest
 import com.poke.pokewikicompose.dataBase.data.repository.SearchMainRepository
 import com.poke.pokewikicompose.utils.INIT
+import com.poke.pokewikicompose.utils.NetworkState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class SearchMainViewModel : ViewModel() {
@@ -30,50 +24,60 @@ class SearchMainViewModel : ViewModel() {
 
     fun dispatch(viewAction: SearchMainViewAction) {
         when (viewAction) {
-            is SearchMainViewAction.GetDataWithStateTest -> getDataWithPageTest()
-            is SearchMainViewAction.GetDataWithState -> getData()
+            is SearchMainViewAction.GetDataWithState -> getDataWithState(viewAction.isRefresh)
             is SearchMainViewAction.ResetLoadingState -> viewStates =
                 viewStates.copy(loadingState = INIT)
 
         }
     }
 
-    private fun getDataWithPageTest() {
+    private fun getDataWithState(isRefresh: Boolean) {
         viewModelScope.launch {
-            _viewEvent.send(SearchMainViewEvent.ShowLoadingDialog)
-            delay(1_000)
-            _viewEvent.send(SearchMainViewEvent.DismissLoadingDialog)
-
-            val list = Pager(PagingConfig(pageSize = 1)) {
-                PokemonSearchPagingResourceTest()
-            }.flow.flowOn(Dispatchers.IO).collectAsLazyPagingItems()
-            viewStates = viewStates.copy(pokemonItemList = list)
+            flow {
+                getDataWithStateLogic(isRefresh)
+                emit("获取宝可梦数据")
+            }.onStart {
+                _viewEvent.send(SearchMainViewEvent.ShowLoadingDialog)
+            }.onEach {
+                _viewEvent.send(SearchMainViewEvent.DismissLoadingDialog)
+            }.catch { e ->
+                _viewEvent.send(SearchMainViewEvent.DismissLoadingDialog)
+                _viewEvent.send(SearchMainViewEvent.ShowToast(e.message ?: "未知异常，请联系管理员"))
+            }.flowOn(Dispatchers.IO).collect()
         }
     }
 
-    private fun getData() {
-        viewModelScope.launch {
-            val list = Pager(PagingConfig(pageSize = 1)) {
-                PokemonSearchPagingResource()
-            }.flow.flowOn(Dispatchers.IO).collectAsLazyPagingItems()
-            viewStates = viewStates.copy(pokemonItemList = list)
+    private suspend fun getDataWithStateLogic(isRefresh: Boolean) {
+        if (isRefresh) {
+            viewStates = viewStates.copy(page = 1, pokemonItemList = ArrayList())
+        }
+        val page = viewStates.page
+        when (val result = repository.getAllPokemonWithPage(page)) {
+            is NetworkState.Success -> {
+                viewStates = viewStates.copy(page = page + 1)
+                viewStates.pokemonItemList.addAll(result.data)
+                _viewEvent.send(SearchMainViewEvent.UpdateDataList)
+            }
+            is NetworkState.Error -> throw Exception(result.msg)
+            else -> {}
         }
     }
 }
 
 data class SearchMainViewState(
+    val page: Int = 1,
     val loadingState: Int = INIT,
-    val pokemonItemList: LazyPagingItems<PokemonSearchBean>? = null
+    val pokemonItemList: ArrayList<PokemonSearchBean> = ArrayList()
 )
 
 sealed class SearchMainViewAction {
-    object GetDataWithState : SearchMainViewAction()
+    data class GetDataWithState(val isRefresh: Boolean) : SearchMainViewAction()
     object ResetLoadingState : SearchMainViewAction()
-    object GetDataWithStateTest : SearchMainViewAction()
 }
 
 sealed class SearchMainViewEvent {
     object ShowLoadingDialog : SearchMainViewEvent()
     object DismissLoadingDialog : SearchMainViewEvent()
     data class ShowToast(val msg: String) : SearchMainViewEvent()
+    object UpdateDataList : SearchMainViewEvent()
 }

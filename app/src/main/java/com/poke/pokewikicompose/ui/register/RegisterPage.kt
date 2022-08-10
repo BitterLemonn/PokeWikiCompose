@@ -32,6 +32,7 @@ import com.poke.pokewikicompose.ui.popupSnackBar
 import com.poke.pokewikicompose.ui.theme.AppTheme
 import com.poke.pokewikicompose.ui.widget.AuthInputEditText
 import com.poke.pokewikicompose.ui.widget.WarpLoadingDialog
+import com.poke.pokewikicompose.utils.LOGIN_PAGE
 import com.poke.pokewikicompose.utils.MAIN_PAGE
 import com.poke.pokewikicompose.utils.REGISTER_PAGE
 
@@ -78,7 +79,7 @@ fun RegisterPage(
                 is RegisterViewEvent.DismissLoadingDialog -> isShowDialog.value = false
                 is RegisterViewEvent.TransIntent -> {
                     navCtrl.navigate(MAIN_PAGE) {
-                        popUpTo(REGISTER_PAGE) { inclusive = true }
+                        popUpTo(LOGIN_PAGE) { inclusive = true }
                     }
                 }
             }
@@ -190,10 +191,4 @@ fun RegisterPage(
         dispatcher?.addCallback(callback)
     } else
         callback.remove()
-}
-
-@Composable
-@Preview
-fun RegisterPreview() {
-//    RegisterPage()
 }

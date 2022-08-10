@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
+import kotlinx.serialization.Serializable
 
 /**
  * 用户信息数据类
@@ -14,8 +15,9 @@ import androidx.room.PrimaryKey
  * @param username 用户名
  */
 @Entity
+@Serializable
 data class UserBean(
-    @PrimaryKey val userId: String,
+    @PrimaryKey val userId: Int,
     @ColumnInfo val email: String,
     @ColumnInfo var profile_photo: String?,
     @ColumnInfo val token: String,

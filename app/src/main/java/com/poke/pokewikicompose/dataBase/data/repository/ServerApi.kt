@@ -1,16 +1,19 @@
 package com.poke.pokewikicompose.dataBase.data.repository
 
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.poke.pokewikicompose.dataBase.data.bean.PokemonDetailBean
 import com.poke.pokewikicompose.dataBase.data.bean.PokemonSearchBean
 import com.poke.pokewikicompose.dataBase.data.bean.UserBean
+import com.poke.pokewikicompose.utils.JsonConverter.Json
 import com.poke.pokewikicompose.utils.ResponseData
 import com.poke.pokewikicompose.utils.SERVER_URL
+import kotlinx.serialization.ExperimentalSerializationApi
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 
 /**
@@ -114,13 +117,16 @@ interface ServerApi {
          * 获取接口实例用于调用对接方法
          * @return ServerApi
          */
+        @OptIn(ExperimentalSerializationApi::class)
         fun create(): ServerApi {
             val client = OkHttpClient.Builder()
                 .addInterceptor(LoggingInterceptor())
                 .build()
             return Retrofit.Builder()
                 .baseUrl(SERVER_URL)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(
+                    Json.asConverterFactory(contentType = "application/json".toMediaType())
+                )
                 .client(client)
                 .build()
                 .create(ServerApi::class.java)

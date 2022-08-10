@@ -74,7 +74,7 @@ dependencies {
     implementation("me.onebone:toolbar-compose:2.3.4")
     //retrofit网络请求
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0"
     // room数据库
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
@@ -86,4 +86,8 @@ dependencies {
     implementation 'com.orhanobut:logger:2.2.0'
     // ComposePager
     implementation "com.google.accompanist:accompanist-pager:0.26.0-alpha"
+    // Compose下拉刷新框架
+    implementation "com.google.accompanist:accompanist-swiperefresh:0.26.0-alpha"
+    // Compose Paging3
+    implementation "androidx.paging:paging-compose:1.0.0-alpha15"
 }

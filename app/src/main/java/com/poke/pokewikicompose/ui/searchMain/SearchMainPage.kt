@@ -9,7 +9,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,12 +24,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.poke.pokewikicompose.R
-import com.poke.pokewikicompose.dataBase.data.bean.PokemonSearchBean
 import com.poke.pokewikicompose.ui.theme.PokeBallRed
 import com.poke.pokewikicompose.ui.widget.PokeBallSearchBar
 import com.poke.pokewikicompose.ui.widget.PokemonSearchCard
 import com.poke.pokewikicompose.ui.widget.WarpLoadingDialog
+import com.poke.pokewikicompose.utils.LOADING
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ExperimentalToolbarApi
 import me.onebone.toolbar.ScrollStrategy
@@ -40,20 +45,15 @@ fun SearchMainPage(
     viewModel: SearchMainViewModel = viewModel()
 ) {
     val viewStates = viewModel.viewStates
-    val searchItems = remember { mutableStateListOf<PokemonSearchBean>() }
     val loading = remember { mutableStateOf(false) }
 
     val collapsingState = rememberCollapsingToolbarScaffoldState()
     val progress = collapsingState.toolbarState.progress
 
     LaunchedEffect(Unit) {
-        viewModel.dispatch(SearchMainViewAction.GetDataWithStateTest(false))
+        viewModel.dispatch(SearchMainViewAction.GetDataWithStateTest)
         viewModel.viewEvent.collect {
             when (it) {
-                is SearchMainViewEvent.UpdateData -> {
-                    searchItems.clear()
-                    searchItems.addAll(it.pokemonDataList)
-                }
                 is SearchMainViewEvent.ShowLoadingDialog -> loading.value = true
                 is SearchMainViewEvent.DismissLoadingDialog -> loading.value = false
                 else -> {}
@@ -121,29 +121,38 @@ fun SearchMainPage(
     ) {
         if (loading.value)
             WarpLoadingDialog(text = "正在加载", alpha = 0.1f)
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(vertical = 10.dp, horizontal = 5.dp),
-            verticalArrangement = Arrangement.SpaceEvenly
+        SwipeRefresh(
+            modifier = Modifier.wrapContentSize(),
+            state = rememberSwipeRefreshState(viewStates.loadingState == LOADING),
+            onRefresh = { viewModel.dispatch(SearchMainViewAction.GetDataWithStateTest) }
         ) {
-            if (searchItems.size > 0)
-                items(searchItems) {
-                    PokemonSearchCard(it)
-                    Spacer(Modifier.height(10.dp))
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(vertical = 10.dp, horizontal = 5.dp),
+                verticalArrangement = Arrangement.SpaceEvenly
+            ) {
+                if (!loading.value) {
+                    if (viewStates.pokemonItemList != null)
+                        items(items = viewStates.pokemonItemList) {
+                            PokemonSearchCard(it)
+                            Spacer(Modifier.height(10.dp))
+                        }
+                    else if (!loading.value)
+                        item {
+                            Text(
+                                text = "暂无相关搜索结果~",
+                                fontSize = 18.sp,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .fillMaxSize()
+                                    .padding(vertical = 200.dp),
+                                textAlign = TextAlign.Center,
+                                color = Color.Gray
+                            )
+                        }
                 }
-            else if (!loading.value)
-                item {
-                    Text(
-                        text = "暂无相关搜索结果~",
-                        fontSize = 18.sp,
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .fillMaxSize()
-                            .padding(vertical = 200.dp),
-                        textAlign = TextAlign.Center,
-                        color = Color.Gray
-                    )
-                }
+            }
+
         }
     }
 }

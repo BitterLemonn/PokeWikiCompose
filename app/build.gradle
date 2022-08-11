@@ -62,6 +62,8 @@ dependencies {
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:1.1.1"
     debugImplementation "androidx.compose.ui:ui-tooling:1.1.1"
 
+    //本地mvi封装
+    implementation(project(":mvi-core"))
     // coil图片库
     implementation 'io.coil-kt:coil-compose:2.1.0'
     implementation 'io.coil-kt:coil-gif:2.1.0'
@@ -87,6 +89,4 @@ dependencies {
     implementation 'com.orhanobut:logger:2.2.0'
     // ComposePager
     implementation "com.google.accompanist:accompanist-pager:0.26.0-alpha"
-    // Compose下拉刷新框架
-    implementation "com.google.accompanist:accompanist-swiperefresh:0.26.0-alpha"
 }

@@ -1,63 +1,57 @@
 package com.poke.pokewikicompose.ui.searchMain
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.orhanobut.logger.Logger
 import com.poke.pokewikicompose.dataBase.data.bean.PokemonSearchBean
 import com.poke.pokewikicompose.dataBase.data.repository.SearchMainRepository
 import com.poke.pokewikicompose.utils.INIT
 import com.poke.pokewikicompose.utils.NetworkState
+import com.zj.mvi.core.SharedFlowEvents
+import com.zj.mvi.core.setEvent
+import com.zj.mvi.core.setState
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class SearchMainViewModel : ViewModel() {
     private val repository = SearchMainRepository.getInstance()
-    var viewStates by mutableStateOf(SearchMainViewState())
-        private set
-    private val _viewEvent = Channel<SearchMainViewEvent>(Channel.BUFFERED)
-    val viewEvent = _viewEvent.receiveAsFlow()
+    private val _viewStates = MutableStateFlow(SearchMainViewState())
+    val viewStates = _viewStates.asStateFlow()
+    private val _viewEvent = SharedFlowEvents<SearchMainViewEvent>()
+    val viewEvent = _viewEvent.asSharedFlow()
 
     fun dispatch(viewAction: SearchMainViewAction) {
         when (viewAction) {
-            is SearchMainViewAction.GetDataWithState -> getDataWithState(viewAction.isRefresh)
-            is SearchMainViewAction.ResetLoadingState -> viewStates =
-                viewStates.copy(loadingState = INIT)
+            is SearchMainViewAction.GetData -> getData()
+            is SearchMainViewAction.ResetLoadingState -> _viewStates.value =
+                _viewStates.value.copy(loadingState = INIT)
 
         }
     }
 
-    private fun getDataWithState(isRefresh: Boolean) {
+    private fun getData() {
         viewModelScope.launch {
             flow {
-                getDataWithStateLogic(isRefresh)
+                getDataLogic()
                 emit("获取宝可梦数据")
             }.onStart {
-                _viewEvent.send(SearchMainViewEvent.ShowLoadingDialog)
+                _viewEvent.setEvent(SearchMainViewEvent.ShowLoadingDialog)
             }.onEach {
-                _viewEvent.send(SearchMainViewEvent.DismissLoadingDialog)
+                _viewEvent.setEvent(SearchMainViewEvent.DismissLoadingDialog)
             }.catch { e ->
-                _viewEvent.send(SearchMainViewEvent.DismissLoadingDialog)
-                _viewEvent.send(SearchMainViewEvent.ShowToast(e.message ?: "未知异常，请联系管理员"))
+                _viewEvent.setEvent(
+                    SearchMainViewEvent.DismissLoadingDialog,
+                    SearchMainViewEvent.ShowToast(e.message ?: "未知异常，请联系管理员")
+                )
             }.flowOn(Dispatchers.IO).collect()
         }
     }
 
-    private suspend fun getDataWithStateLogic(isRefresh: Boolean) {
-        if (isRefresh) {
-            viewStates = viewStates.copy(page = 1, pokemonItemList = ArrayList())
-        }
-        val page = viewStates.page
+    private suspend fun getDataLogic() {
+        val page = _viewStates.value.page
         when (val result = repository.getAllPokemonWithPage(page)) {
-            is NetworkState.Success -> {
-                viewStates = viewStates.copy(page = page + 1)
-                viewStates.pokemonItemList.addAll(result.data)
-                _viewEvent.send(SearchMainViewEvent.UpdateDataList)
-            }
+            is NetworkState.Success ->
+                _viewStates.setState { copy(page = page + 1, pokemonItemList = result.data) }
             is NetworkState.Error -> throw Exception(result.msg)
             else -> {}
         }
@@ -71,7 +65,7 @@ data class SearchMainViewState(
 )
 
 sealed class SearchMainViewAction {
-    data class GetDataWithState(val isRefresh: Boolean) : SearchMainViewAction()
+    object GetData : SearchMainViewAction()
     object ResetLoadingState : SearchMainViewAction()
 }
 
@@ -79,5 +73,4 @@ sealed class SearchMainViewEvent {
     object ShowLoadingDialog : SearchMainViewEvent()
     object DismissLoadingDialog : SearchMainViewEvent()
     data class ShowToast(val msg: String) : SearchMainViewEvent()
-    object UpdateDataList : SearchMainViewEvent()
 }

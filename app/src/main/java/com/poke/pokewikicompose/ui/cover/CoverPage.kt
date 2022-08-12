@@ -113,5 +113,7 @@ fun onSkipClick(navController: NavController, skipType: String, hadUserInfo: Boo
             navController.navigate(route = MAIN_PAGE) {
                 popUpTo(COVER_PAGE) { inclusive = true }
             }
+    }else{
+        navController.popBackStack()
     }
 }

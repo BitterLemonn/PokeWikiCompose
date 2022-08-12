@@ -65,4 +65,6 @@ val Warn = Color(0xFFD87831)
 val Success = Color(0xFF67BF63)
 val Error = Color(0xFFDD302E)
 
+val BtnText = Color(0xFF7F7F7F)
+
 val profile_edit_user_name = Color(0xFF4C4C4C)

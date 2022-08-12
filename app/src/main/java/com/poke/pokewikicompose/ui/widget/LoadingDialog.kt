@@ -23,7 +23,8 @@ import com.poke.pokewikicompose.R
 @Composable
 private fun LoadingDialog(
     text: String,
-    dialogSize: Int
+    dialogSize: Int,
+    dialogAlpha: Float = 0.5f
 ) {
     Canvas(modifier = Modifier.size(dialogSize.dp)) {
         inset {
@@ -31,7 +32,7 @@ private fun LoadingDialog(
                 color = Color.White,
                 size = size,
                 cornerRadius = CornerRadius(20.0f),
-                alpha = 0.5f, // 透明度
+                alpha = dialogAlpha, // 透明度
             )
         }
     }
@@ -61,14 +62,15 @@ private fun LoadingDialog(
 fun WarpLoadingDialog(
     text: String,
     size: Int = 120,
-    alpha: Float = 0.4f
+    backgroundAlpha: Float = 0.4f,
+    dialogAlpha: Float = 0.5f
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colors.onSurface.copy(alpha = alpha)
+        color = MaterialTheme.colors.onSurface.copy(alpha = backgroundAlpha)
     ) {
         Box(modifier = Modifier.wrapContentSize()) {
-            LoadingDialog("$text...", size)
+            LoadingDialog("$text...", size, dialogAlpha)
         }
     }
 }

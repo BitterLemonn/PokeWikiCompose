@@ -1,9 +1,24 @@
 package com.poke.pokewikicompose.utils
 
 import android.content.Context
+import com.orhanobut.logger.Logger
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
+fun getAppVersionName(context: Context): String {
+    var versionName = ""
+    try {
+        val pm = context.packageManager
+        val pi = pm.getPackageInfo(context.packageName, 0);
+        versionName = pi.versionName;
+        if (versionName == null || versionName.isEmpty()) {
+            return ""
+        }
+    } catch (e: Exception) {
+        Logger.e("VersionInfo", "Exception", e)
+    }
+    return versionName
+}
 
 fun dip2px(context: Context, dpValue: Double): Int {
     val scale = context.resources.displayMetrics.density

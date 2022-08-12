@@ -14,13 +14,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.orhanobut.logger.Logger
 import com.poke.pokewikicompose.ui.AppSnackBar
+import com.poke.pokewikicompose.ui.about.AboutPage
 import com.poke.pokewikicompose.ui.cover.CoverPage
 import com.poke.pokewikicompose.ui.login.LoginPage
 import com.poke.pokewikicompose.ui.main.MainPage
@@ -36,7 +39,7 @@ fun AppScaffold() {
     val currentDestination = navBackStackEntry?.destination
 
     val mainPageList = listOf<@Composable () -> Unit>(
-        {},
+        { AboutPage(scaffoldState, navController)},
         { SearchMainPage(navController, scaffoldState) },
         {}
     )
@@ -49,7 +52,7 @@ fun AppScaffold() {
             SnackbarHost(
                 hostState = scaffoldState.snackbarHostState
             ) { data ->
-                println("actionLabel = ${data.actionLabel}")
+                Logger.i("actionLabel = ${data.actionLabel}")
                 AppSnackBar(data = data)
             }
         }
@@ -67,6 +70,19 @@ fun AppScaffold() {
                     Color.Black, darkIcons = MaterialTheme.colors.isLight
                 )
                 CoverPage(navController = navController)
+            }
+            composable(route = "$COVER_PAGE?skipType={skipType}", arguments = listOf(
+                navArgument("skipType"){
+                    defaultValue = "Cover"
+                    type = NavType.StringType
+                }
+            )) {
+                rememberSystemUiController().setNavigationBarColor(
+                    Color.Black, darkIcons = MaterialTheme.colors.isLight
+                )
+                val argument = requireNotNull(it.arguments)
+                val type = argument.getString("skipType")
+                CoverPage(navController = navController, skipType = type?:"Cover")
             }
             composable(route = LOGIN_PAGE) {
                 rememberSystemUiController().setNavigationBarColor(

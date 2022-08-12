@@ -8,7 +8,7 @@ import com.poke.pokewikicompose.ui.theme.AppTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-const val SNACK_INFO = ""
+const val SNACK_INFO = "确定"
 const val SNACK_WARN = " "
 const val SNACK_ERROR = "  "
 const val SNACK_SUCCESS = "OK"
@@ -18,7 +18,7 @@ fun AppSnackBar(data: SnackbarData) {
     Snackbar(
         snackbarData = data,
         backgroundColor = when (data.actionLabel) {
-            SNACK_INFO -> AppTheme.colors.themeUi
+            SNACK_INFO -> AppTheme.colors.background
             SNACK_WARN -> AppTheme.colors.warn
             SNACK_ERROR -> AppTheme.colors.error
             SNACK_SUCCESS -> AppTheme.colors.success

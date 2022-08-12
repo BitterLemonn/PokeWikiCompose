@@ -137,7 +137,7 @@ fun SearchMainPage(
         }
     ) {
         if (loading.value)
-            WarpLoadingDialog(text = "正在加载", alpha = 0.1f)
+            WarpLoadingDialog(text = "正在加载", backgroundAlpha = 0.1f)
         LazyLoadMoreColumn (
             loadState = loading.value,
             onLoad = {

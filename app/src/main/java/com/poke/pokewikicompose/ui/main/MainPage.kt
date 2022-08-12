@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -21,6 +22,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.poke.pokewikicompose.R
+import com.poke.pokewikicompose.ui.theme.RoyalBlue
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPagerApi::class)
@@ -33,6 +35,7 @@ fun MainPage(
     val selectedIndex = remember { mutableStateOf(0) }
     val coroutineScope = rememberCoroutineScope()
     val pageState = rememberPagerState()
+
     LaunchedEffect(Unit) {
         selectedIndex.value = 1
         pageState.scrollToPage(1)
@@ -97,7 +100,10 @@ fun MainPage(
                             contentDescription = "about us",
                             modifier = Modifier
                                 .size(22.dp)
-                                .align(Alignment.Center)
+                                .align(Alignment.Center),
+                            colorFilter = if (pageState.currentPage == 0)
+                                ColorFilter.tint(RoyalBlue)
+                            else null
                         )
                     }
                     Spacer(modifier = Modifier.width(15.dp))
@@ -116,7 +122,10 @@ fun MainPage(
                             contentDescription = "my profile",
                             modifier = Modifier
                                 .size(22.dp)
-                                .align(Alignment.Center)
+                                .align(Alignment.Center),
+                            colorFilter = if (pageState.currentPage == 2)
+                                ColorFilter.tint(RoyalBlue)
+                            else null
                         )
                     }
                 }

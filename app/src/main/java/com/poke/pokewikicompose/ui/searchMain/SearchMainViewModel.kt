@@ -17,8 +17,8 @@ class SearchMainViewModel : ViewModel() {
     private val repository = SearchMainRepository.getInstance()
     private val _viewStates = MutableStateFlow(SearchMainViewState())
     val viewStates = _viewStates.asStateFlow()
-    private val _viewEvent = SharedFlowEvents<SearchMainViewEvent>()
-    val viewEvent = _viewEvent.asSharedFlow()
+    private val _viewEvents = SharedFlowEvents<SearchMainViewEvent>()
+    val viewEvents = _viewEvents.asSharedFlow()
 
     fun dispatch(viewAction: SearchMainViewAction) {
         when (viewAction) {
@@ -35,11 +35,11 @@ class SearchMainViewModel : ViewModel() {
                 getDataLogic()
                 emit("获取宝可梦数据")
             }.onStart {
-                _viewEvent.setEvent(SearchMainViewEvent.ShowLoadingDialog)
+                _viewEvents.setEvent(SearchMainViewEvent.ShowLoadingDialog)
             }.onEach {
-                _viewEvent.setEvent(SearchMainViewEvent.DismissLoadingDialog)
+                _viewEvents.setEvent(SearchMainViewEvent.DismissLoadingDialog)
             }.catch { e ->
-                _viewEvent.setEvent(
+                _viewEvents.setEvent(
                     SearchMainViewEvent.DismissLoadingDialog,
                     SearchMainViewEvent.ShowToast(e.message ?: "未知异常，请联系管理员")
                 )

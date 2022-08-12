@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -32,6 +33,8 @@ import com.poke.pokewikicompose.ui.widget.WarpLoadingDialog
 import com.poke.pokewikicompose.utils.LOGIN_PAGE
 import com.poke.pokewikicompose.utils.MAIN_PAGE
 import com.poke.pokewikicompose.utils.REGISTER_PAGE
+import com.zj.mvi.core.observeEvent
+import com.zj.mvi.core.observeState
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -43,8 +46,12 @@ fun LoginPage(
     val viewStates = viewModel.viewStates
     val coroutineState = rememberCoroutineScope()
     val keyboardController = LocalSoftwareKeyboardController.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     val isShowDialog = remember { mutableStateOf(false) }
+    val email = remember { mutableStateOf(viewStates.value.email) }
+    val password = remember { mutableStateOf(viewStates.value.password) }
+    val enable = remember { mutableStateOf(viewStates.value.enable) }
 
     val callback = remember {
         object : OnBackPressedCallback(true) {
@@ -56,7 +63,7 @@ fun LoginPage(
     val dispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
     LaunchedEffect(Unit) {
-        viewModel.viewEvent.collect {
+        viewModel.viewEvent.observeEvent(lifecycleOwner) {
             when (it) {
                 is LoginViewEvent.ShowToast ->
                     popupSnackBar(coroutineState, scaffoldState, label = SNACK_ERROR, it.msg)
@@ -67,6 +74,17 @@ fun LoginPage(
                 }
                 is LoginViewEvent.ShowLoadingDialog -> isShowDialog.value = true
                 is LoginViewEvent.DismissLoadingDialog -> isShowDialog.value = false
+            }
+        }
+        viewStates.let { states ->
+            states.observeState(lifecycleOwner, LoginViewState::email) {
+                email.value = it
+            }
+            states.observeState(lifecycleOwner, LoginViewState::password) {
+                password.value = it
+            }
+            states.observeState(lifecycleOwner, LoginViewState::enable) {
+                enable.value = it
             }
         }
     }
@@ -97,7 +115,7 @@ fun LoginPage(
             // 邮箱输入
             AuthInputEditText(
                 hint = stringResource(id = R.string.email_hint),
-                value = viewStates.email,
+                value = email.value,
                 onValueChange = { viewModel.dispatch(LoginViewAction.UpdateEmail(it)) },
                 isTransform = false,
                 keyboardOptions = KeyboardOptions(
@@ -109,7 +127,7 @@ fun LoginPage(
             // 密码输入
             AuthInputEditText(
                 hint = stringResource(id = R.string.password_hint),
-                value = viewStates.password,
+                value = password.value,
                 onValueChange = { viewModel.dispatch(LoginViewAction.UpdatePassword(it)) },
                 isTransform = true,
                 keyboardOptions = KeyboardOptions(
@@ -155,7 +173,10 @@ fun LoginPage(
                 // 注册按钮
                 Button(
                     modifier = Modifier.wrapContentWidth(),
-                    onClick = { navCtrl.navigate(REGISTER_PAGE) },
+                    onClick = {
+                        keyboardController?.hide()
+                        navCtrl.navigate(REGISTER_PAGE)
+                    },
                     elevation = ButtonDefaults.elevation(
                         defaultElevation = 0.dp,
                         hoveredElevation = 0.dp,
@@ -177,8 +198,11 @@ fun LoginPage(
 
             // 登录按钮
             Button(
-                onClick = { viewModel.dispatch(LoginViewAction.OnLoginClicked) },
-                enabled = viewStates.enable,
+                onClick = {
+                    keyboardController?.hide()
+                    viewModel.dispatch(LoginViewAction.OnLoginClicked)
+                },
+                enabled = enable.value,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .fillMaxWidth()

@@ -1,9 +1,5 @@
 package com.poke.pokewikicompose.ui.login
 
-import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.poke.pokewikicompose.dataBase.GlobalDataBase
@@ -12,34 +8,32 @@ import com.poke.pokewikicompose.dataBase.data.repository.LoginRepository
 import com.poke.pokewikicompose.utils.AppContext
 import com.poke.pokewikicompose.utils.NetworkState
 import com.poke.pokewikicompose.utils.md5
+import com.zj.mvi.core.SharedFlowEvents
+import com.zj.mvi.core.setEvent
+import com.zj.mvi.core.setState
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class LoginViewModel : ViewModel() {
 
     private val repository = LoginRepository.getInstance()
-    var viewStates by mutableStateOf(LoginViewState())
-        private set
-    private val _viewEvent = Channel<LoginViewEvent>(Channel.BUFFERED)
-    val viewEvent = _viewEvent.receiveAsFlow()
+    private val _viewStates = MutableStateFlow(LoginViewState())
+    val viewStates = _viewStates.asStateFlow()
+    private val _viewEvent = SharedFlowEvents<LoginViewEvent>()
+    val viewEvent = _viewEvent.asSharedFlow()
 
     var userResult: UserBean? = null
 
     fun dispatch(viewAction: LoginViewAction) {
         when (viewAction) {
             is LoginViewAction.UpdateEmail ->
-                viewStates = viewStates.copy(email = viewAction.email)
+                _viewStates.setState { copy(email = viewAction.email) }
             is LoginViewAction.UpdatePassword ->
-                viewStates = viewStates.copy(password = viewAction.password)
-            is LoginViewAction.ChangeErrorState -> updateErrorState(viewAction.error)
+                _viewStates.setState { copy(password = viewAction.password) }
+            is LoginViewAction.ChangeErrorState -> _viewStates.setState { copy(error = viewAction.error) }
             is LoginViewAction.OnLoginClicked -> login()
         }
-    }
-
-    private fun updateErrorState(error: Boolean) {
-        viewStates = viewStates.copy(error = error)
     }
 
     private fun login() {
@@ -48,24 +42,26 @@ class LoginViewModel : ViewModel() {
                 loginLogic()
                 emit("登陆成功")
             }.onStart {
-                _viewEvent.send(LoginViewEvent.ShowLoadingDialog)
+                _viewEvent.setEvent(LoginViewEvent.ShowLoadingDialog)
             }.onEach {
                 userResult?.let { GlobalDataBase.database.userDao().insert(userResult!!) }
-                _viewEvent.send(LoginViewEvent.DismissLoadingDialog)
+                _viewEvent.setEvent(LoginViewEvent.DismissLoadingDialog)
             }.catch {
-                _viewEvent.send(LoginViewEvent.DismissLoadingDialog)
-                _viewEvent.send(LoginViewEvent.ShowToast(it.message ?: ""))
+                _viewEvent.setEvent(
+                    LoginViewEvent.DismissLoadingDialog,
+                    LoginViewEvent.ShowToast(it.message ?: "")
+                )
             }.flowOn(Dispatchers.IO).collect()
         }
     }
 
     private suspend fun loginLogic() {
-        val email = viewStates.email
-        val password = viewStates.password
+        val email = viewStates.value.email
+        val password = viewStates.value.password
 
         // 测试专用
         if (email == "1" && password == "1") {
-            _viewEvent.send(LoginViewEvent.TransIntent)
+            _viewEvent.setEvent(LoginViewEvent.TransIntent)
             val data =
                 UserBean(
                     email = email,
@@ -82,7 +78,7 @@ class LoginViewModel : ViewModel() {
         // 正常流程
             when (val result = repository.getAuth(email, md5(password))) {
                 is NetworkState.Success -> {
-                    _viewEvent.send(LoginViewEvent.TransIntent)
+                    _viewEvent.setEvent(LoginViewEvent.TransIntent)
                     //写入全局
                     AppContext.userData = result.data
                     //Room持久化

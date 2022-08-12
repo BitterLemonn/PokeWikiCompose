@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
@@ -61,7 +60,7 @@ fun SearchMainPage(
             viewModel.dispatch(SearchMainViewAction.GetData)
             isFirstInit.value = false
         }
-        viewModel.viewEvent.observeEvent(lifecycleOwner) {
+        viewModel.viewEvents.observeEvent(lifecycleOwner) {
             when (it) {
                 is SearchMainViewEvent.ShowLoadingDialog -> loading.value = true
                 is SearchMainViewEvent.DismissLoadingDialog -> loading.value = false
@@ -139,7 +138,7 @@ fun SearchMainPage(
     ) {
         if (loading.value)
             WarpLoadingDialog(text = "正在加载", alpha = 0.1f)
-        LazyLoadMoreColumn(
+        LazyLoadMoreColumn (
             loadState = loading.value,
             onLoad = {
                 viewModel.dispatch(SearchMainViewAction.GetData)

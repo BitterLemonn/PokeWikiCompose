@@ -16,12 +16,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -34,7 +34,9 @@ import com.poke.pokewikicompose.ui.widget.AuthInputEditText
 import com.poke.pokewikicompose.ui.widget.WarpLoadingDialog
 import com.poke.pokewikicompose.utils.LOGIN_PAGE
 import com.poke.pokewikicompose.utils.MAIN_PAGE
-import com.poke.pokewikicompose.utils.REGISTER_PAGE
+import com.zj.mvi.core.observeEvent
+import com.zj.mvi.core.observeState
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -45,6 +47,7 @@ fun RegisterPage(
 ) {
     val viewStates = viewModel.viewStates
     val coroutineState = rememberCoroutineScope()
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     val isShowDialog = remember { mutableStateOf(false) }
 
@@ -58,6 +61,11 @@ fun RegisterPage(
     val dispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    val password = remember { mutableStateOf(viewStates.value.password) }
+    val email = remember { mutableStateOf(viewStates.value.email) }
+    val certain = remember { mutableStateOf(viewStates.value.certain) }
+    val enable = remember { mutableStateOf(viewStates.value.enable) }
+
     DisposableEffect(Unit) {
         onDispose {
             viewModel.dispatch(RegisterViewAction.UpdateEmail(""))
@@ -67,7 +75,7 @@ fun RegisterPage(
     }
 
     LaunchedEffect(Unit) {
-        viewModel.viewEvents.collect {
+        viewModel.viewEvents.observeEvent(lifecycleOwner) {
             when (it) {
                 is RegisterViewEvent.ShowToast -> popupSnackBar(
                     coroutineState,
@@ -82,6 +90,20 @@ fun RegisterPage(
                         popUpTo(LOGIN_PAGE) { inclusive = true }
                     }
                 }
+            }
+        }
+        viewStates.let { states ->
+            states.observeState(lifecycleOwner, RegisterViewState::email) {
+                email.value = it
+            }
+            states.observeState(lifecycleOwner, RegisterViewState::password) {
+                password.value = it
+            }
+            states.observeState(lifecycleOwner, RegisterViewState::certain) {
+                certain.value = it
+            }
+            states.observeState(lifecycleOwner, RegisterViewState::enable) {
+                enable.value = it
             }
         }
     }
@@ -114,7 +136,7 @@ fun RegisterPage(
         Column(modifier = Modifier.fillMaxWidth(0.8f)) {
             AuthInputEditText(
                 hint = stringResource(id = R.string.email_reg_hint),
-                value = viewStates.email,
+                value = email.value,
                 onValueChange = { viewModel.dispatch(RegisterViewAction.UpdateEmail(it)) },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
@@ -124,7 +146,7 @@ fun RegisterPage(
             Spacer(modifier = Modifier.height(46.dp))
             AuthInputEditText(
                 hint = stringResource(id = R.string.password_reg_hint),
-                value = viewStates.password,
+                value = password.value,
                 onValueChange = { viewModel.dispatch(RegisterViewAction.UpdatePassword(it)) },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
@@ -135,7 +157,7 @@ fun RegisterPage(
             Spacer(modifier = Modifier.height(46.dp))
             AuthInputEditText(
                 hint = stringResource(id = R.string.password_certain_hint),
-                value = viewStates.certain,
+                value = certain.value,
                 onValueChange = { viewModel.dispatch(RegisterViewAction.UpdateCertain(it)) },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
@@ -143,26 +165,22 @@ fun RegisterPage(
                 ),
                 keyboardActions = KeyboardActions(
                     onDone = {
-                        keyboardController?.hide()
-                        viewModel.dispatch(RegisterViewAction.OnRegisterClicked)
+                        if (enable.value) {
+                            keyboardController?.hide()
+                            viewModel.dispatch(RegisterViewAction.OnRegisterClicked)
+                        } else {
+                            coroutineState.launch {
+                                keyboardController?.hide()
+                            }
+                        }
                     }
                 )
             )
             Spacer(modifier = Modifier.height(106.dp))
             // 注册按钮
             Button(
-                onClick = {
-                    if (viewStates.same)
-                        viewModel.dispatch(RegisterViewAction.OnRegisterClicked)
-                    else
-                        popupSnackBar(
-                            coroutineState,
-                            scaffoldState,
-                            label = SNACK_ERROR,
-                            "两次输入的密码不正确"
-                        )
-                },
-                enabled = viewStates.enable,
+                onClick = { viewModel.dispatch(RegisterViewAction.OnRegisterClicked) },
+                enabled = enable.value,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .fillMaxWidth()

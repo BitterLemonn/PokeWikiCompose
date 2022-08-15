@@ -23,3 +23,9 @@ data class UserBean(
     @ColumnInfo val token: String,
     @ColumnInfo val username: String
 )
+
+@Entity
+data class LocalSetting(
+    @PrimaryKey val userId: Int,
+    @ColumnInfo val isAutoCache: Boolean
+)

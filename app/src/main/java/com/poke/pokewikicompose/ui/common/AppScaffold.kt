@@ -27,6 +27,7 @@ import com.poke.pokewikicompose.ui.about.AboutPage
 import com.poke.pokewikicompose.ui.cover.CoverPage
 import com.poke.pokewikicompose.ui.login.LoginPage
 import com.poke.pokewikicompose.ui.main.MainPage
+import com.poke.pokewikicompose.ui.profile.ProfilePage
 import com.poke.pokewikicompose.ui.register.RegisterPage
 import com.poke.pokewikicompose.ui.searchMain.SearchMainPage
 import com.poke.pokewikicompose.utils.*
@@ -41,7 +42,7 @@ fun AppScaffold() {
     val mainPageList = listOf<@Composable () -> Unit>(
         { AboutPage(scaffoldState, navController)},
         { SearchMainPage(navController, scaffoldState) },
-        {}
+        { ProfilePage(scaffoldState, navController)}
     )
 
     Scaffold(

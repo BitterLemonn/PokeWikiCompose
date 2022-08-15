@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.poke.pokewikicompose.R
+import com.poke.pokewikicompose.dataBase.data.bean.LocalSetting
 import com.poke.pokewikicompose.dataBase.data.bean.UserBean
 import com.poke.pokewikicompose.ui.theme.*
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -65,7 +66,7 @@ fun GetColorByText(text: String): Color {
     }
 }
 
-object JsonConverter{
+object JsonConverter {
     @OptIn(ExperimentalSerializationApi::class)
     val Json: Json = Json {
         ignoreUnknownKeys = true
@@ -83,4 +84,19 @@ object AppContext {
         token = "",
         username = ""
     )
+
+    var localSetting = LocalSetting(
+        userId = 0,
+        isAutoCache = false
+    )
+
+    fun logout() {
+        userData = UserBean(
+            userId = 0,
+            email = "",
+            profile_photo = null,
+            token = "",
+            username = ""
+        )
+    }
 }

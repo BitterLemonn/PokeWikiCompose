@@ -3,6 +3,7 @@ package com.poke.pokewikicompose.ui.register
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.poke.pokewikicompose.dataBase.GlobalDataBase
+import com.poke.pokewikicompose.dataBase.data.bean.LocalSetting
 import com.poke.pokewikicompose.dataBase.data.repository.RegisterRepository
 import com.poke.pokewikicompose.utils.AppContext
 import com.poke.pokewikicompose.utils.NetworkState
@@ -61,6 +62,12 @@ class RegisterViewModel : ViewModel() {
                 //Room持久化
                 GlobalDataBase.database.userDao().deleteAll()
                 GlobalDataBase.database.userDao().insert(result.data)
+                GlobalDataBase.database.localSettingDao().updateLocalSetting(
+                    LocalSetting(
+                        userId = result.data.userId,
+                        isAutoCache = false
+                    )
+                )
             }
             is NetworkState.Error -> throw Exception(result.msg)
             is NetworkState.NoNeedResponse -> throw Exception(result.msg)

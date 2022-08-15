@@ -14,18 +14,11 @@ android {
         minSdk 21
         targetSdk 32
         versionCode 1
-        versionName "1.1"
+        versionName "1.1-Beta"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
-        }
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
@@ -87,6 +80,6 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0-RC"
     // 更好的Logger
     implementation 'com.orhanobut:logger:2.2.0'
-    // ComposePager
+    // ComposePager (viewpager)
     implementation "com.google.accompanist:accompanist-pager:0.26.0-alpha"
 }

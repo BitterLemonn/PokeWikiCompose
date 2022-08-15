@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ScaffoldState
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -16,14 +15,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.poke.pokewikicompose.R
 import com.poke.pokewikicompose.ui.SNACK_SUCCESS
 import com.poke.pokewikicompose.ui.popupSnackBar
-import com.poke.pokewikicompose.ui.theme.AppTheme
 import com.poke.pokewikicompose.ui.theme.BtnText
 import com.poke.pokewikicompose.ui.widget.ScreenItemBtn
 import com.poke.pokewikicompose.ui.widget.WarpLoadingDialog
@@ -35,8 +32,8 @@ import kotlin.random.Random
 
 @Composable
 fun AboutPage(
-    scaffoldState: ScaffoldState? = null,
-    navCtrl: NavController? = null
+    scaffoldState: ScaffoldState,
+    navCtrl: NavController
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -79,14 +76,12 @@ fun AboutPage(
                     coroutineScope.launch {
                         isLoading.value = true
                         delay(Random.nextLong(500, 1_500))
-                        scaffoldState?.let {
-                            popupSnackBar(
-                                coroutineScope,
-                                scaffoldState,
-                                label = SNACK_SUCCESS,
-                                message = "当前已是最新版本"
-                            )
-                        }
+                        popupSnackBar(
+                            coroutineScope,
+                            scaffoldState,
+                            label = SNACK_SUCCESS,
+                            message = "当前已是最新版本"
+                        )
                         isLoading.value = false
                     }
                 }
@@ -95,21 +90,19 @@ fun AboutPage(
                     text = "给PokeWiKi好评",
                     modifier = Modifier.padding(horizontal = 18.dp)
                 ) {
-                    scaffoldState?.let {
-                        popupSnackBar(
-                            coroutineScope,
-                            scaffoldState,
-                            label = SNACK_SUCCESS,
-                            message = "感谢您的评价！"
-                        )
-                    }
+                    popupSnackBar(
+                        coroutineScope,
+                        scaffoldState,
+                        label = SNACK_SUCCESS,
+                        message = "感谢您的评价！"
+                    )
                 }
                 ScreenItemBtn(
                     leftIcon = R.drawable.welcome,
                     text = "欢迎页",
                     modifier = Modifier.padding(horizontal = 18.dp)
                 ) {
-                    navCtrl?.navigate("$COVER_PAGE?skipType=About")
+                    navCtrl.navigate("$COVER_PAGE?skipType=About")
                 }
                 ScreenItemBtn(
                     leftIcon = R.drawable.contact,
@@ -146,14 +139,4 @@ fun AboutPage(
             text = "正在检查更新",
             dialogAlpha = 0.8f
         )
-}
-
-@Composable
-@Preview(showBackground = true)
-private fun AboutPagePreview() {
-    AppTheme {
-        Surface(color = Color(0xFFE5E5E5)) {
-            AboutPage()
-        }
-    }
 }

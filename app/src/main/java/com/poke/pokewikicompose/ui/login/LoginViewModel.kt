@@ -3,6 +3,7 @@ package com.poke.pokewikicompose.ui.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.poke.pokewikicompose.dataBase.GlobalDataBase
+import com.poke.pokewikicompose.dataBase.data.bean.LocalSetting
 import com.poke.pokewikicompose.dataBase.data.bean.UserBean
 import com.poke.pokewikicompose.dataBase.data.repository.LoginRepository
 import com.poke.pokewikicompose.utils.AppContext
@@ -58,36 +59,24 @@ class LoginViewModel : ViewModel() {
     private suspend fun loginLogic() {
         val email = viewStates.value.email
         val password = viewStates.value.password
-
-        // 测试专用
-        if (email == "1" && password == "1") {
-            _viewEvent.setEvent(LoginViewEvent.TransIntent)
-            val data =
-                UserBean(
-                    email = email,
-                    token = "123123123",
-                    userId = 1,
-                    username = "宝可梦训练师",
-                    profile_photo = null
+        when (val result = repository.getAuth(email, md5(password))) {
+            is NetworkState.Success -> {
+                _viewEvent.setEvent(LoginViewEvent.TransIntent)
+                //写入全局
+                AppContext.userData = result.data
+                //Room持久化
+                GlobalDataBase.database.userDao().deleteAll()
+                GlobalDataBase.database.userDao().insert(result.data)
+                GlobalDataBase.database.localSettingDao().updateLocalSetting(
+                    LocalSetting(
+                        userId = result.data.userId,
+                        isAutoCache = false
+                    )
                 )
-            //写入全局
-            AppContext.userData = data
-            //临时保存
-            userResult = data
-        } else
-        // 正常流程
-            when (val result = repository.getAuth(email, md5(password))) {
-                is NetworkState.Success -> {
-                    _viewEvent.setEvent(LoginViewEvent.TransIntent)
-                    //写入全局
-                    AppContext.userData = result.data
-                    //Room持久化
-                    GlobalDataBase.database.userDao().deleteAll()
-                    GlobalDataBase.database.userDao().insert(result.data)
-                }
-                is NetworkState.NoNeedResponse -> throw Exception(result.msg)
-                is NetworkState.Error -> throw Exception(result.msg)
             }
+            is NetworkState.NoNeedResponse -> throw Exception(result.msg)
+            is NetworkState.Error -> throw Exception(result.msg)
+        }
     }
 }
 

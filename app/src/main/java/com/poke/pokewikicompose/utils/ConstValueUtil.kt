@@ -16,6 +16,7 @@ const val LOGIN_PAGE = "LOGIN_PAGE"
 const val REGISTER_PAGE = "REGISTER_PAGE"
 const val MAIN_PAGE = "MAIN_PAGE"
 const val SEARCH_MAIN_PAGE = "SEARCH_MAIN_PAGE"
+const val PROFILE_EDIT_PAGE = "PROFILE_EDIT_PAGE"
 
 // 服务器地址
 const val SERVER_URL = "http://192.168.2.12:8080/v1/"

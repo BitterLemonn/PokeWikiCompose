@@ -23,7 +23,7 @@ import com.poke.pokewikicompose.ui.theme.RoyalBlue
 @Composable
 fun ScreenItemBtn(
     modifier: Modifier = Modifier,
-    @DrawableRes leftIcon: Int,
+    @DrawableRes leftIcon: Int? = null,
     text: String,
     subText: String = "",
     isShowArrow: Boolean = false,
@@ -52,11 +52,13 @@ fun ScreenItemBtn(
                 else 10.dp
             )
         ) {
-            Image(
-                painter = painterResource(leftIcon),
-                contentDescription = text,
-                modifier = Modifier.size(27.dp)
-            )
+            leftIcon?.let {
+                Image(
+                    painter = painterResource(leftIcon),
+                    contentDescription = text,
+                    modifier = Modifier.size(27.dp)
+                )
+            }
             Spacer(modifier = Modifier.width(32.dp))
             Column(verticalArrangement = Arrangement.SpaceEvenly) {
                 Text(

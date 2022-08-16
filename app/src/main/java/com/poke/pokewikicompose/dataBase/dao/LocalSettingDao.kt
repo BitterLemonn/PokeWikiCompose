@@ -10,8 +10,11 @@ import com.poke.pokewikicompose.dataBase.data.bean.LocalSetting
 @Dao
 interface LocalSettingDao {
     @Query("SELECT * FROM localsetting WHERE userId == :userID")
-    fun getLocalSettingWithUserID(userID: Int): LocalSetting
+    fun getLocalSettingWithUserID(userID: Int): LocalSetting?
 
     @Update
     fun updateLocalSetting(setting: LocalSetting)
+
+    @Insert
+    fun insertLocalSetting(setting: LocalSetting)
 }

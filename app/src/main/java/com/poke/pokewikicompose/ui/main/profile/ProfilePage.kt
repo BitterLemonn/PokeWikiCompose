@@ -1,4 +1,4 @@
-package com.poke.pokewikicompose.ui.profile
+package com.poke.pokewikicompose.ui.main.profile
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -27,6 +27,7 @@ import com.poke.pokewikicompose.ui.widget.ScreenItemBtn
 import com.poke.pokewikicompose.utils.AppContext
 import com.poke.pokewikicompose.utils.LOGIN_PAGE
 import com.poke.pokewikicompose.utils.MAIN_PAGE
+import com.poke.pokewikicompose.utils.PROFILE_EDIT_PAGE
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
@@ -47,31 +48,35 @@ fun ProfilePage(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceEvenly
     ) {
+        Spacer(modifier = Modifier.height(20.dp))
         // 个人信息卡片
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp)
+                .padding(horizontal = 20.dp)
                 .weight(0.25f),
             elevation = 10.dp,
             shape = RoundedCornerShape(6.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(start = 20.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Image(
                     modifier = Modifier
-                        .size(90.dp)
                         .clip(CircleShape)
-                        .weight(0.4f),
+                        .size(90.dp),
                     painter = rememberAsyncImagePainter(
-                        model = if (userInfo.profile_photo.isNullOrBlank()) userInfo.profile_photo
-                        else R.drawable.default_icon
+                        model = if (userInfo.profile_photo.isNullOrBlank()) R.drawable.default_icon
+                        else userInfo.profile_photo
                     ),
                     contentDescription = "user icon"
                 )
+                Spacer(modifier = Modifier.width(20.dp))
                 Column(
                     modifier = Modifier
                         .weight(0.6f)
@@ -114,7 +119,7 @@ fun ProfilePage(
                 text = "编辑个人信息",
                 isShowArrow = true
             ) {
-                // TODO 跳转编辑个人信息
+                navCtrl?.navigate(PROFILE_EDIT_PAGE)
             }
             ScreenItemBtn(
                 modifier = Modifier.padding(horizontal = 20.dp),

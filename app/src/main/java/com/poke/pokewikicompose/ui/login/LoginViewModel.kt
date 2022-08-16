@@ -67,12 +67,17 @@ class LoginViewModel : ViewModel() {
                 //Room持久化
                 GlobalDataBase.database.userDao().deleteAll()
                 GlobalDataBase.database.userDao().insert(result.data)
-                GlobalDataBase.database.localSettingDao().updateLocalSetting(
-                    LocalSetting(
-                        userId = result.data.userId,
-                        isAutoCache = false
+                val setting = GlobalDataBase.database.localSettingDao()
+                    .getLocalSettingWithUserID(result.data.userId)
+                if (setting != null)
+                    GlobalDataBase.database.localSettingDao().updateLocalSetting(setting)
+                else
+                    GlobalDataBase.database.localSettingDao().insertLocalSetting(
+                        LocalSetting(
+                            userId = result.data.userId,
+                            isAutoCache = false
+                        )
                     )
-                )
             }
             is NetworkState.NoNeedResponse -> throw Exception(result.msg)
             is NetworkState.Error -> throw Exception(result.msg)

@@ -31,7 +31,7 @@ class CoverViewModel : ViewModel() {
                             GlobalDataBase.database.localSettingDao().getLocalSettingWithUserID(
                                 userID = it[0].userId
                             )
-                        AppContext.localSetting = setting
+                        AppContext.localSetting = setting!!
                     }
                 }
                 _viewEvent.send(CoverViewEvent.OverProcess)

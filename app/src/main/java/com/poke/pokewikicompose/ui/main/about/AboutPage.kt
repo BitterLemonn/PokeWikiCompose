@@ -1,4 +1,4 @@
-package com.poke.pokewikicompose.ui.about
+package com.poke.pokewikicompose.ui.main.about
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*

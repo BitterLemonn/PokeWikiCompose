@@ -62,7 +62,7 @@ class RegisterViewModel : ViewModel() {
                 //Room持久化
                 GlobalDataBase.database.userDao().deleteAll()
                 GlobalDataBase.database.userDao().insert(result.data)
-                GlobalDataBase.database.localSettingDao().updateLocalSetting(
+                GlobalDataBase.database.localSettingDao().insertLocalSetting(
                     LocalSetting(
                         userId = result.data.userId,
                         isAutoCache = false

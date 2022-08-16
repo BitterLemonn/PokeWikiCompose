@@ -1,4 +1,4 @@
-package com.poke.pokewikicompose.ui.searchMain
+package com.poke.pokewikicompose.ui.main.searchMain
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

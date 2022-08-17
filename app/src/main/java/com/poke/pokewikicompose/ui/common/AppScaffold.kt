@@ -37,7 +37,6 @@ fun AppScaffold() {
     val navController = rememberNavController()
     val scaffoldState = rememberScaffoldState()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination
 
     val mainPageList = listOf<@Composable () -> Unit>(
         { AboutPage(scaffoldState, navController) },

@@ -6,48 +6,71 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Scaffold
-import androidx.compose.material.ScaffoldState
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.os.bundleOf
 import androidx.navigation.NavController
-import androidx.navigation.NavOptions
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import com.orhanobut.logger.Logger
 import com.poke.pokewikicompose.R
 import com.poke.pokewikicompose.ui.theme.AppTheme
+import com.poke.pokewikicompose.ui.theme.RoyalBlue
+import com.poke.pokewikicompose.ui.widget.HintDialog
 import com.poke.pokewikicompose.ui.widget.ScreenItemBtn
 import com.poke.pokewikicompose.ui.widget.TitleBar
 import com.poke.pokewikicompose.utils.AppContext
-import com.poke.pokewikicompose.utils.MAIN_PAGE
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ProfileEditPage(
     navCtrl: NavController,
     scaffoldState: ScaffoldState?
 ) {
-    val userInfo = remember { mutableStateOf(AppContext.userData) }.value
+    val imeCtrl = LocalSoftwareKeyboardController.current
+    val dispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
+    val userInfo = remember { mutableStateOf(AppContext.userData) }.value
+    val isChangeUsername = remember { mutableStateOf(false) }
+    val isShowWarn = remember { mutableStateOf(false) }
+    val tmpName = remember { mutableStateOf(TextFieldValue(userInfo.username)) }
+    val focusRequester = remember { FocusRequester() }
+
+    val callback = remember {
+        object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // 显示是否返回提示
+                isShowWarn.value = true
+            }
+        }
+    }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TitleBar(
                 title = "个人信息编辑",
                 onBackClick = {
-                    navCtrl.popBackStack()
+                    if (isChangeUsername.value)
+                        isShowWarn.value = true
+                    else
+                        navCtrl.popBackStack()
                 }
             )
         }
@@ -73,21 +96,56 @@ fun ProfileEditPage(
                 error = painterResource(R.drawable.default_icon)
             )
             Box(modifier = Modifier.fillMaxWidth(0.5f).wrapContentHeight()) {
-                Text(
-                    text = userInfo.username,
-                    color = Color.Black,
-                    fontSize = 16.sp,
-                    modifier = Modifier.align(Alignment.Center)
+                TextField(
+                    value = tmpName.value,
+                    onValueChange = {
+                        tmpName.value = it
+                    },
+                    singleLine = true,
+                    colors = TextFieldDefaults.textFieldColors(
+                        textColor = Color.Black,
+                        backgroundColor = Color.Transparent,
+                        focusedIndicatorColor = if (isChangeUsername.value) RoyalBlue
+                        else Color.Transparent,
+                        unfocusedIndicatorColor = if (isChangeUsername.value) Color.Gray
+                        else Color.Transparent
+                    ),
+                    textStyle = LocalTextStyle.current.copy(
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center
+                    ),
+                    readOnly = !isChangeUsername.value,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(vertical = 0.dp)
+                        .width(120.dp)
+                        .focusRequester(focusRequester)
+                        .onFocusChanged {
+                            if (it.isFocused) {
+                                Logger.d(imeCtrl)
+                                imeCtrl?.show()
+                                tmpName.value = tmpName.value.copy(
+                                    selection = TextRange(tmpName.value.text.length)
+                                )
+                            }
+                        },
                 )
                 Image(
-                    painter = painterResource(R.drawable.edit_icon),
+                    painter = if (!isChangeUsername.value) painterResource(R.drawable.edit_icon)
+                    else painterResource(R.drawable.edit_check),
                     contentDescription = "edit username",
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
                         .size(30.dp)
                         .clip(CircleShape)
                         .clickable {
-
+                            if (!isChangeUsername.value) {
+                                isChangeUsername.value = !isChangeUsername.value
+                                focusRequester.requestFocus()
+                            } else {
+                                isChangeUsername.value = !isChangeUsername.value
+                                focusRequester.freeFocus()
+                            }
                         }
                 )
             }
@@ -101,6 +159,20 @@ fun ProfileEditPage(
             )
         }
     }
+
+    if (isShowWarn.value) {
+        HintDialog(
+            hint = "您的编辑还未保存\n是否退出",
+            highLineCertain = false,
+            onClickCertain = { navCtrl.popBackStack() },
+            onClickCancel = { isShowWarn.value = false }
+        )
+    }
+
+    if (isChangeUsername.value) {
+        dispatcher?.addCallback(callback)
+    } else
+        callback.remove()
 }
 
 @Composable

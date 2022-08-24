@@ -1,6 +1,7 @@
 package com.poke.pokewikicompose.ui.widget
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
@@ -29,7 +30,8 @@ fun HintDialog(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colors.onSurface.copy(alpha = 0.1f)),
+            .background(MaterialTheme.colors.onSurface.copy(alpha = 0.1f))
+            .clickable {  },
         contentAlignment = Alignment.Center
     ) {
         Box(

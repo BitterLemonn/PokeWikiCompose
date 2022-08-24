@@ -10,6 +10,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -31,19 +32,23 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.orhanobut.logger.Logger
 import com.poke.pokewikicompose.R
+import com.poke.pokewikicompose.ui.SNACK_ERROR
+import com.poke.pokewikicompose.ui.popupSnackBar
 import com.poke.pokewikicompose.ui.theme.AppTheme
 import com.poke.pokewikicompose.ui.theme.RoyalBlue
 import com.poke.pokewikicompose.ui.widget.HintDialog
 import com.poke.pokewikicompose.ui.widget.ScreenItemBtn
 import com.poke.pokewikicompose.ui.widget.TitleBar
 import com.poke.pokewikicompose.utils.AppContext
+import com.poke.pokewikicompose.utils.PASSWORD_EDIT_PAGE
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ProfileEditPage(
     navCtrl: NavController,
-    scaffoldState: ScaffoldState?
+    scaffoldState: ScaffoldState
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val imeCtrl = LocalSoftwareKeyboardController.current
     val dispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
@@ -99,7 +104,18 @@ fun ProfileEditPage(
                 TextField(
                     value = tmpName.value,
                     onValueChange = {
-                        tmpName.value = it
+                        // 不能超过8个字符
+                        if (it.text.length > 8) {
+                            tmpName.value = TextFieldValue(it.text.slice(IntRange(0, 7)))
+                                .copy(selection = TextRange(8))
+                            popupSnackBar(
+                                coroutineScope,
+                                scaffoldState,
+                                SNACK_ERROR,
+                                "用户名最多为8个字符"
+                            )
+                        } else
+                            tmpName.value = it
                     },
                     singleLine = true,
                     colors = TextFieldDefaults.textFieldColors(
@@ -154,7 +170,7 @@ fun ProfileEditPage(
                 text = "修改密码",
                 isShowArrow = true,
                 onClick = {
-
+                    navCtrl.navigate(PASSWORD_EDIT_PAGE)
                 }
             )
         }
@@ -183,7 +199,7 @@ private fun ProfileEditPreview() {
             color = AppTheme.colors.background,
             modifier = Modifier.fillMaxSize()
         ) {
-            ProfileEditPage(navCtrl = rememberNavController(), null)
+            ProfileEditPage(navCtrl = rememberNavController(), rememberScaffoldState())
         }
     }
 }

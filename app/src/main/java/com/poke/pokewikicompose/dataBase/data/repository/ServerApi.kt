@@ -100,7 +100,7 @@ interface ServerApi {
         @Field("newPassword") newPassword: String,
         @Field("userId") userId: String,
         @Field("token") token: String
-    ): ResponseData<UserBean>
+    ): NullableResponseData<UserBean>
 
     @POST("changeProfilePicture")
     suspend fun updateUserIcon(

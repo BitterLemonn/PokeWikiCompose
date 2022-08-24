@@ -20,9 +20,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.orhanobut.logger.Logger
 import com.poke.pokewikicompose.ui.AppSnackBar
 import com.poke.pokewikicompose.ui.cover.CoverPage
+import com.poke.pokewikicompose.ui.edit.profile.password.PasswordEditPage
 import com.poke.pokewikicompose.ui.edit.profile.ProfileEditPage
 import com.poke.pokewikicompose.ui.login.LoginPage
 import com.poke.pokewikicompose.ui.main.MainPage
@@ -122,6 +122,14 @@ fun AppScaffold() {
                     Color(0xFFEFEFEF), darkIcons = MaterialTheme.colors.isLight
                 )
                 ProfileEditPage(navCtrl = navController, scaffoldState = scaffoldState)
+            }
+            composable(
+                route = PASSWORD_EDIT_PAGE
+            ) {
+                rememberSystemUiController().setNavigationBarColor(
+                    Color(0xFFEFEFEF), darkIcons = MaterialTheme.colors.isLight
+                )
+                PasswordEditPage(navCtrl = navController, scaffoldState = scaffoldState)
             }
         }
     }

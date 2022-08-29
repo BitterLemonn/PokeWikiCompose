@@ -1,4 +1,4 @@
-package com.poke.pokewikicompose.ui.edit.profile.password
+package com.poke.pokewikicompose.ui.edit.password
 
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner

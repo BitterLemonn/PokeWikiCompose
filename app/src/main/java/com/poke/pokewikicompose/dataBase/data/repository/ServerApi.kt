@@ -91,7 +91,7 @@ interface ServerApi {
         @Field("newusername") username: String,
         @Field("userId") userId: String,
         @Field("token") token: String
-    ): ResponseData<UserBean>
+    ): NullableResponseData<UserBean>
 
     @POST("updatePassword")
     @FormUrlEncoded

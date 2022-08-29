@@ -7,10 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -19,6 +16,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
@@ -27,35 +25,43 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.orhanobut.logger.Logger
 import com.poke.pokewikicompose.R
 import com.poke.pokewikicompose.ui.SNACK_ERROR
+import com.poke.pokewikicompose.ui.SNACK_SUCCESS
 import com.poke.pokewikicompose.ui.popupSnackBar
 import com.poke.pokewikicompose.ui.theme.AppTheme
 import com.poke.pokewikicompose.ui.theme.RoyalBlue
-import com.poke.pokewikicompose.ui.widget.HintDialog
-import com.poke.pokewikicompose.ui.widget.ScreenItemBtn
-import com.poke.pokewikicompose.ui.widget.TitleBar
+import com.poke.pokewikicompose.ui.widget.*
 import com.poke.pokewikicompose.utils.AppContext
 import com.poke.pokewikicompose.utils.PASSWORD_EDIT_PAGE
+import com.zj.mvi.core.observeEvent
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ProfileEditPage(
     navCtrl: NavController,
-    scaffoldState: ScaffoldState
+    scaffoldState: ScaffoldState,
+    viewModel: ProfileEditViewModel = viewModel()
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val lifecycleOwner = LocalLifecycleOwner.current
     val imeCtrl = LocalSoftwareKeyboardController.current
     val dispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+    val viewStates = viewModel.viewStates
+
+    val bottomButton = remember { mutableStateListOf<BottomButtonItem>() }
 
     val userInfo = remember { mutableStateOf(AppContext.userData) }.value
     val isChangeUsername = remember { mutableStateOf(false) }
+    val isShowBottomDialog = remember { mutableStateOf(false) }
     val isShowWarn = remember { mutableStateOf(false) }
-    val tmpName = remember { mutableStateOf(TextFieldValue(userInfo.username)) }
+    val isShowLoading = remember { mutableStateOf(false) }
+    val tmpName = remember { mutableStateOf(TextFieldValue(viewStates.value.username)) }
     val focusRequester = remember { FocusRequester() }
 
     val callback = remember {
@@ -63,6 +69,30 @@ fun ProfileEditPage(
             override fun handleOnBackPressed() {
                 // 显示是否返回提示
                 isShowWarn.value = true
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        bottomButton.add(BottomButtonItem(text = "拍照") {})
+        bottomButton.add(BottomButtonItem(text = "从相册中选择") {})
+
+        viewModel.viewEvents.observeEvent(lifecycleOwner) {
+            when (it) {
+                is ProfileEditViewEvents.ShowLoadingDialog -> isShowLoading.value = true
+                is ProfileEditViewEvents.DismissLoadingDialog -> isShowLoading.value = false
+                is ProfileEditViewEvents.ShowToast -> popupSnackBar(
+                    coroutineScope,
+                    scaffoldState,
+                    SNACK_ERROR,
+                    it.msg
+                )
+                is ProfileEditViewEvents.SuccessChange -> popupSnackBar(
+                    coroutineScope,
+                    scaffoldState,
+                    SNACK_SUCCESS,
+                    "修改成功"
+                )
             }
         }
     }
@@ -96,7 +126,7 @@ fun ProfileEditPage(
                     .size(100.dp)
                     .clip(CircleShape)
                     .clickable {
-
+                        isShowBottomDialog.value = true
                     },
                 error = painterResource(R.drawable.default_icon)
             )
@@ -161,6 +191,8 @@ fun ProfileEditPage(
                             } else {
                                 isChangeUsername.value = !isChangeUsername.value
                                 focusRequester.freeFocus()
+                                viewModel.dispatch(ProfileEditViewActions.UpdateUsername(tmpName.value.text))
+                                viewModel.dispatch(ProfileEditViewActions.ChangeUsername)
                             }
                         }
                 )
@@ -176,6 +208,10 @@ fun ProfileEditPage(
         }
     }
 
+    if (isShowLoading.value) {
+        WarpLoadingDialog(text = "正在修改")
+    }
+
     if (isShowWarn.value) {
         HintDialog(
             hint = "您的编辑还未保存\n是否退出",
@@ -184,6 +220,10 @@ fun ProfileEditPage(
             onClickCancel = { isShowWarn.value = false }
         )
     }
+    BottomDialog(
+        items = bottomButton,
+        isShow = isShowBottomDialog
+    )
 
     if (isChangeUsername.value) {
         dispatcher?.addCallback(callback)

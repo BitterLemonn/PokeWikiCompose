@@ -1,8 +1,7 @@
-package com.poke.pokewikicompose.ui.edit.profile.password
+package com.poke.pokewikicompose.ui.edit.password
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.poke.pokewikicompose.dataBase.AppDataBase
 import com.poke.pokewikicompose.dataBase.GlobalDataBase
 import com.poke.pokewikicompose.dataBase.data.repository.PasswordEditRepository
 import com.poke.pokewikicompose.utils.AppContext

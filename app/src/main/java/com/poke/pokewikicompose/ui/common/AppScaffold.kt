@@ -22,7 +22,7 @@ import androidx.navigation.navArgument
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.poke.pokewikicompose.ui.AppSnackBar
 import com.poke.pokewikicompose.ui.cover.CoverPage
-import com.poke.pokewikicompose.ui.edit.profile.password.PasswordEditPage
+import com.poke.pokewikicompose.ui.edit.password.PasswordEditPage
 import com.poke.pokewikicompose.ui.edit.profile.ProfileEditPage
 import com.poke.pokewikicompose.ui.login.LoginPage
 import com.poke.pokewikicompose.ui.main.MainPage

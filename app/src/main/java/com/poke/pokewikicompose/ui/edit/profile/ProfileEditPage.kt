@@ -2,6 +2,7 @@ package com.poke.pokewikicompose.ui.edit.profile
 
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -28,7 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import com.orhanobut.logger.Logger
 import com.poke.pokewikicompose.R
 import com.poke.pokewikicompose.ui.SNACK_ERROR
@@ -40,6 +41,8 @@ import com.poke.pokewikicompose.ui.widget.*
 import com.poke.pokewikicompose.utils.AppContext
 import com.poke.pokewikicompose.utils.PASSWORD_EDIT_PAGE
 import com.zj.mvi.core.observeEvent
+import github.leavesczy.matisse.Matisse
+import github.leavesczy.matisse.MatisseContract
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -55,8 +58,12 @@ fun ProfileEditPage(
     val viewStates = viewModel.viewStates
 
     val bottomButton = remember { mutableStateListOf<BottomButtonItem>() }
-
     val userInfo = remember { mutableStateOf(AppContext.userData) }.value
+    val painter = rememberAsyncImagePainter(
+        model = userInfo.profile_photo,
+        placeholder = painterResource(R.drawable.default_icon),
+        error = painterResource(R.drawable.default_icon)
+    )
     val isChangeUsername = remember { mutableStateOf(false) }
     val isShowBottomDialog = remember { mutableStateOf(false) }
     val isShowWarn = remember { mutableStateOf(false) }
@@ -72,10 +79,23 @@ fun ProfileEditPage(
             }
         }
     }
+    val launcher = rememberLauncherForActivityResult(MatisseContract()) {
+        if (it.isNotEmpty()) {
+            val mediaResource = it[0]
+            val imageUri = mediaResource.uri
+            val imagePath = mediaResource.path
+            Logger.d("imagePath: $imagePath")
+            viewModel.dispatch(ProfileEditViewActions.ChangeUserIcon(imagePath))
+        }
+    }
 
     LaunchedEffect(Unit) {
+
         bottomButton.add(BottomButtonItem(text = "拍照") {})
-        bottomButton.add(BottomButtonItem(text = "从相册中选择") {})
+        bottomButton.add(BottomButtonItem(text = "从相册中选择") {
+            launcher.launch(Matisse())
+            isShowBottomDialog.value = false
+        })
 
         viewModel.viewEvents.observeEvent(lifecycleOwner) {
             when (it) {
@@ -87,12 +107,23 @@ fun ProfileEditPage(
                     SNACK_ERROR,
                     it.msg
                 )
-                is ProfileEditViewEvents.SuccessChange -> popupSnackBar(
-                    coroutineScope,
-                    scaffoldState,
-                    SNACK_SUCCESS,
-                    "修改成功"
-                )
+                is ProfileEditViewEvents.SuccessChangeName ->
+                    popupSnackBar(
+                        coroutineScope,
+                        scaffoldState,
+                        SNACK_SUCCESS,
+                        "修改成功"
+                    )
+                is ProfileEditViewEvents.SuccessChangeIcon -> {
+                    popupSnackBar(
+                        coroutineScope,
+                        scaffoldState,
+                        SNACK_SUCCESS,
+                        "修改成功"
+                    )
+                    // TODO 目前coil无法重新更换data 返回强制刷新
+                    navCtrl.popBackStack()
+                }
             }
         }
     }
@@ -118,17 +149,15 @@ fun ProfileEditPage(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
-            AsyncImage(
-                model = if (userInfo.profile_photo.isNullOrBlank()) R.drawable.default_icon
-                else userInfo.profile_photo,
+            Image(
+                painter = painter,
                 contentDescription = "profile photo",
                 modifier = Modifier
                     .size(100.dp)
                     .clip(CircleShape)
                     .clickable {
                         isShowBottomDialog.value = true
-                    },
-                error = painterResource(R.drawable.default_icon)
+                    }
             )
             Box(modifier = Modifier.fillMaxWidth(0.5f).wrapContentHeight()) {
                 TextField(

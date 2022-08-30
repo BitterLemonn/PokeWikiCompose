@@ -105,7 +105,7 @@ interface ServerApi {
     @POST("changeProfilePicture")
     suspend fun updateUserIcon(
         @Body multipartBody: MultipartBody
-    ): ResponseData<String>
+    ): NullableResponseData<String>
 
     @POST("getUserFavorite")
     @FormUrlEncoded

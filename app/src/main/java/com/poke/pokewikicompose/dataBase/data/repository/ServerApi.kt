@@ -58,14 +58,14 @@ interface ServerApi {
     suspend fun like(
         @Field("userId") user_id: String,
         @Field("pokemon_id") poke_id: Int
-    ): ResponseData<Any>
+    ): NullableResponseData<String>
 
     @POST("cancelUserStar")
     @FormUrlEncoded
     suspend fun unlike(
         @Field("userId") user_id: String,
         @Field("pokemon_id") poke_id: Int
-    ): ResponseData<Any>
+    ): NullableResponseData<String>
 
     @POST("searchPokeByName")
     @FormUrlEncoded

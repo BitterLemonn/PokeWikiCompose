@@ -9,6 +9,7 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @TypeConverters(StringArrayConverter::class, PokemonEvolutionArrayConverter::class)
+@Serializable
 data class PokemonIntroBean(
     @ColumnInfo val intro_text: String? = "",
     @ColumnInfo val poke_evolution: ArrayList<PokemonEvolutionBean> = ArrayList(),

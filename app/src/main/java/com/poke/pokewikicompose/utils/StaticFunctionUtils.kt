@@ -1,7 +1,9 @@
 package com.poke.pokewikicompose.utils
 
 import android.content.Context
+import androidx.compose.ui.graphics.Color
 import com.orhanobut.logger.Logger
+import com.poke.pokewikicompose.ui.theme.*
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
@@ -47,4 +49,23 @@ fun md5(string: String): String {
         e.printStackTrace()
     }
     return ""
+}
+
+fun getPokemonColor(pokemonColor: String): Color {
+    return when (pokemonColor) {
+        "black" -> PokemonBlack
+        "blue" -> PokemonBlue
+        "brown" -> PokemonBrown
+        "gray" -> PokemonGray
+        "green" -> PokemonGreen
+        "pink" -> PokemonPink
+        "purple" -> PokemonPurple
+        "red" -> PokemonRed
+        "white" -> PokemonWhite
+        "yellow" -> PokemonYellow
+        else -> {
+            Logger.e("wrong pokemon color: $pokemonColor")
+            Color.Transparent
+        }
+    }
 }

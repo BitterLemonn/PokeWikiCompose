@@ -1,12 +1,12 @@
 package com.poke.pokewikicompose.ui.main.searchMain
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -22,6 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.orhanobut.logger.Logger
 import com.poke.pokewikicompose.R
 import com.poke.pokewikicompose.dataBase.data.bean.PokemonSearchBean
 import com.poke.pokewikicompose.ui.theme.PokeBallRed
@@ -29,6 +31,7 @@ import com.poke.pokewikicompose.ui.widget.LazyLoadMoreColumn
 import com.poke.pokewikicompose.ui.widget.PokeBallSearchBar
 import com.poke.pokewikicompose.ui.widget.PokemonSearchCard
 import com.poke.pokewikicompose.ui.widget.WarpLoadingDialog
+import com.poke.pokewikicompose.utils.DETAIL_PAGE
 import com.zj.mvi.core.observeEvent
 import com.zj.mvi.core.observeState
 import kotlinx.coroutines.launch
@@ -54,7 +57,10 @@ fun SearchMainPage(
     val dataList = remember { mutableStateListOf<PokemonSearchBean>() }
 
     val lifecycleOwner = LocalLifecycleOwner.current
-
+    rememberSystemUiController().setStatusBarColor(
+        PokeBallRed,
+        darkIcons = MaterialTheme.colors.isLight
+    )
     LaunchedEffect(Unit) {
         if (isFirstInit.value) {
             viewModel.dispatch(SearchMainViewAction.GetData)
@@ -130,7 +136,7 @@ fun SearchMainPage(
                     onValueChange = {
                         // TODO
                     },
-                    onClick = { Log.e("", "SearchMainPage: 点击了搜索") }
+                    onClick = { Logger.e("", "SearchMainPage: 点击了搜索") }
                 )
             }
 
@@ -138,7 +144,7 @@ fun SearchMainPage(
     ) {
         if (loading.value)
             WarpLoadingDialog(text = "正在加载", backgroundAlpha = 0.1f)
-        LazyLoadMoreColumn (
+        LazyLoadMoreColumn(
             loadState = loading.value,
             onLoad = {
                 viewModel.dispatch(SearchMainViewAction.GetData)
@@ -151,7 +157,9 @@ fun SearchMainPage(
             ) {
                 if (!loading.value && dataList.size > 0) {
                     items(items = dataList) {
-                        PokemonSearchCard(it)
+                        PokemonSearchCard(it) {
+                            navCtrl.navigate("$DETAIL_PAGE/${it.pokemon_id}")
+                        }
                         Spacer(Modifier.height(10.dp))
                     }
                 } else if (dataList.size == 0)

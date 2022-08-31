@@ -30,6 +30,7 @@ import com.poke.pokewikicompose.ui.main.about.AboutPage
 import com.poke.pokewikicompose.ui.main.profile.ProfilePage
 import com.poke.pokewikicompose.ui.main.searchMain.SearchMainPage
 import com.poke.pokewikicompose.ui.register.RegisterPage
+import com.poke.pokewikicompose.ui.search.DetailPage
 import com.poke.pokewikicompose.utils.*
 
 @Composable
@@ -70,12 +71,15 @@ fun AppScaffold() {
                 )
                 CoverPage(navController = navController)
             }
-            composable(route = "$COVER_PAGE?skipType={skipType}", arguments = listOf(
-                navArgument("skipType") {
-                    defaultValue = "Cover"
-                    type = NavType.StringType
-                }
-            )) {
+            composable(
+                route = "$COVER_PAGE?skipType={skipType}",
+                arguments = listOf(
+                    navArgument("skipType") {
+                        defaultValue = "Cover"
+                        type = NavType.StringType
+                    }
+                )
+            ) {
                 rememberSystemUiController().setNavigationBarColor(
                     Color.Black, darkIcons = MaterialTheme.colors.isLight
                 )
@@ -130,6 +134,22 @@ fun AppScaffold() {
                     Color(0xFFEFEFEF), darkIcons = MaterialTheme.colors.isLight
                 )
                 PasswordEditPage(navCtrl = navController, scaffoldState = scaffoldState)
+            }
+            composable(
+                route = "$DETAIL_PAGE/{pokemonID}",
+                arguments = listOf(
+                    navArgument("pokemonID") {
+                        defaultValue = 1
+                        type = NavType.IntType
+                    }
+                )
+            ) {
+                rememberSystemUiController().setNavigationBarColor(
+                    Color(0xFFEFEFEF), darkIcons = MaterialTheme.colors.isLight
+                )
+                val argument = requireNotNull(it.arguments)
+                val id = argument.getInt("pokemonID")
+                DetailPage(pokemonID = id, navCtrl = navController, scaffoldState = scaffoldState)
             }
         }
     }

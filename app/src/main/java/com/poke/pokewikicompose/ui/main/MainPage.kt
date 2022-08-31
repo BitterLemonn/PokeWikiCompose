@@ -26,6 +26,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.orhanobut.logger.Logger
 import com.poke.pokewikicompose.R
 import com.poke.pokewikicompose.ui.theme.AppTheme
 import com.poke.pokewikicompose.ui.theme.PokeBallRed
@@ -41,7 +42,7 @@ fun MainPage(
 ) {
     val selectedIndex = rememberSaveable { mutableStateOf(1) }
     val coroutineScope = rememberCoroutineScope()
-    val pageState = rememberPagerState()
+    val pageState = rememberPagerState(1)
 
     LaunchedEffect(Unit) {
         pageState.scrollToPage(selectedIndex.value)
@@ -59,7 +60,7 @@ fun MainPage(
                     .weight(1f),
                 state = pageState
             ) { page ->
-                selectedIndex.value = page
+                selectedIndex.value = pageState.currentPage
                 mainPageList?.let {
                     mainPageList[page].invoke()
                 }
@@ -98,6 +99,7 @@ fun MainPage(
                         .clickable {
                             if (pageState.currentPage != 0)
                                 coroutineScope.launch {
+                                    selectedIndex.value = 0
                                     pageState.scrollToPage(0)
                                 }
                         }) {
@@ -119,6 +121,7 @@ fun MainPage(
                         .clickable {
                             if (pageState.currentPage != 2)
                                 coroutineScope.launch {
+                                    selectedIndex.value = 2
                                     pageState.scrollToPage(2)
                                 }
                         }

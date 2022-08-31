@@ -2,13 +2,8 @@ package com.poke.pokewikicompose.ui.theme
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.TweenSpec
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
-import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 private val LightColorPalette = AppColors(
@@ -137,8 +132,5 @@ fun AppTheme(
     systemUiCtrl.setNavigationBarColor(appColors.themeUi)
     systemUiCtrl.setSystemBarsColor(appColors.themeUi)
 
-    ProvideWindowInsets {
-        CompositionLocalProvider(LocalAppColors provides appColors, content = content)
-    }
-
+    CompositionLocalProvider(LocalAppColors provides appColors, content = content)
 }

@@ -8,6 +8,7 @@ import com.poke.pokewikicompose.dataBase.data.PokemonIntroConverter
 import com.poke.pokewikicompose.dataBase.data.PokemonMovesConverter
 import com.poke.pokewikicompose.dataBase.data.PokemonStateConverter
 import com.poke.pokewikicompose.dataBase.data.StringArrayConverter
+import kotlinx.serialization.Serializable
 
 @Entity
 @TypeConverters(
@@ -16,6 +17,7 @@ import com.poke.pokewikicompose.dataBase.data.StringArrayConverter
     PokemonStateConverter::class,
     PokemonMovesConverter::class
 )
+@Serializable
 data class PokemonDetailBean(
     @PrimaryKey val pokemon_id: String,
     @ColumnInfo val img_url: String,
@@ -27,4 +29,20 @@ data class PokemonDetailBean(
     @ColumnInfo val poke_intro: PokemonIntroBean,
     @ColumnInfo val poke_stat: PokemonStateBean,
     @ColumnInfo val poke_moves: PokemonMovesBean
-)
+){
+    companion object{
+        fun getEmpty(): PokemonDetailBean{
+            return PokemonDetailBean(
+                "",
+                "",
+                0,
+                "white",
+                "",
+                ArrayList(),
+                PokemonIntroBean(),
+                PokemonStateBean(),
+                PokemonMovesBean()
+            )
+        }
+    }
+}

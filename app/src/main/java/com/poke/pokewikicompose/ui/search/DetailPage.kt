@@ -1,6 +1,7 @@
 package com.poke.pokewikicompose.ui.search
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -21,6 +22,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.poke.pokewikicompose.R
 import com.poke.pokewikicompose.dataBase.data.bean.PokemonDetailBean
@@ -28,12 +32,16 @@ import com.poke.pokewikicompose.ui.SNACK_ERROR
 import com.poke.pokewikicompose.ui.SNACK_SUCCESS
 import com.poke.pokewikicompose.ui.popupSnackBar
 import com.poke.pokewikicompose.ui.theme.BackGround
+import com.poke.pokewikicompose.ui.widget.BottomNaviBar
+import com.poke.pokewikicompose.ui.widget.NaviItem
 import com.poke.pokewikicompose.ui.widget.PokemonTag
 import com.poke.pokewikicompose.ui.widget.WarpLoadingDialog
 import com.poke.pokewikicompose.utils.getPokemonColor
 import com.zj.mvi.core.observeEvent
 import com.zj.mvi.core.observeState
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun DetailPage(
     pokemonID: Int,
@@ -41,6 +49,8 @@ fun DetailPage(
     navCtrl: NavController,
     viewModel: DetailPageViewModel = viewModel()
 ) {
+    val itemList = remember { mutableStateListOf<NaviItem>() }
+
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -49,7 +59,14 @@ fun DetailPage(
     val isShowLoading = remember { mutableStateOf(false) }
     val pokeDetail = remember { mutableStateOf(PokemonDetailBean.getEmpty()) }
 
+    val pageStates = rememberPagerState(0)
+    val curPage = remember { mutableStateOf(pageStates.currentPage) }
+
     LaunchedEffect(Unit) {
+        itemList.add(NaviItem(R.drawable.pokemon_info, "信息"))
+        itemList.add(NaviItem(R.drawable.pokemon_state, "状态"))
+        itemList.add(NaviItem(R.drawable.pokemon_move, "招式"))
+
         viewModel.viewEvents.observeEvent(lifecycleOwner) {
             when (it) {
                 is DetailPageViewEvents.TransDetail -> {
@@ -86,7 +103,7 @@ fun DetailPage(
         }
         viewModel.dispatch(DetailPageViewActions.GetDetailWithID(pokemonID))
     }
-    rememberSystemUiController().setStatusBarColor(
+    rememberSystemUiController().setSystemBarsColor(
         getPokemonColor(pokeDetail.value.pokemon_color),
         darkIcons = MaterialTheme.colors.isLight
     )
@@ -198,7 +215,7 @@ fun DetailPage(
                     Spacer(modifier = Modifier.height(10.dp))
                     LazyRow(
                         modifier = Modifier
-                            .padding(horizontal = 85.dp)
+                            .padding(horizontal = 110.dp)
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
@@ -206,6 +223,42 @@ fun DetailPage(
                         items(pokeDetail.value.pokemon_type) {
                             PokemonTag(text = it, isColored = true)
                         }
+                    }
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .padding(top = 130.dp)
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+            ) {
+                HorizontalPager(
+                    count = 3,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    state = pageStates
+                ) { page ->
+                    curPage.value = pageStates.currentPage
+                    when (page) {
+
+                    }
+                }
+                Box(
+                    modifier = Modifier
+                        .height(60.dp)
+                        .fillMaxWidth()
+                        .background(Color.White)
+                ) {
+                    Divider(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = Color.LightGray
+                    )
+                    BottomNaviBar(
+                        itemList = itemList,
+                        chooseIndex = curPage.value
+                    ) {
+                        coroutineScope.launch { pageStates.scrollToPage(it) }
                     }
                 }
             }

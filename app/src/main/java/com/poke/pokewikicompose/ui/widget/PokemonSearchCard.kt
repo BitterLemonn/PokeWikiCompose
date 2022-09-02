@@ -28,7 +28,7 @@ fun PokemonSearchCard(
         Log.d("TAG", "PokemonSearchCard: 点击")
     }
 ) {
-    Surface(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(60.dp),
@@ -108,7 +108,7 @@ fun PokemonSearchCard(
 
 @Composable
 @Preview
-fun preview() {
+private fun PokemonSearchCardPreview() {
     val typeArrayList = ArrayList<String>()
     typeArrayList.add("草")
     typeArrayList.add("毒")

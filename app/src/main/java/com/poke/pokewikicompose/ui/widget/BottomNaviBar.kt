@@ -32,7 +32,6 @@ fun BottomNaviBar(
     val rememberChoose = remember { mutableStateOf(chooseIndex) }
     LaunchedEffect(chooseIndex) {
         rememberChoose.value = chooseIndex
-        Logger.d("now bottom init index: $rememberChoose")
     }
 
     LazyRow(

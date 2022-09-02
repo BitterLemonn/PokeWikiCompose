@@ -35,7 +35,7 @@ const val SHARED_KEY = "POKE_WIKI_SHARED_KEY"
 const val USER_DATA = "USER_DATA"
 
 @Composable
-fun GetColorByText(text: String): Color {
+fun getColorByText(text: String): Color {
     return when (text) {
         stringResource(R.string.pokemon_type_general) -> General
         stringResource(R.string.pokemon_type_fly) -> Fly
@@ -75,7 +75,6 @@ object JsonConverter {
         ignoreUnknownKeys = true
         explicitNulls = false
         encodeDefaults = false
-        explicitNulls = false
     }
 }
 

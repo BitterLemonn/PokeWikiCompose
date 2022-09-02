@@ -13,7 +13,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.poke.pokewikicompose.utils.GetColorByText
+import com.poke.pokewikicompose.utils.getColorByText
 import kotlin.math.max
 
 @Composable
@@ -25,7 +25,7 @@ fun PokemonTag(
 ) {
     val color =
         if (!isColored) Color.Transparent
-        else GetColorByText(text)
+        else getColorByText(text)
     val size = if (isColored) max(fontSize * text.length + 15, tagWidth) else tagWidth
     Surface(
         modifier = Modifier

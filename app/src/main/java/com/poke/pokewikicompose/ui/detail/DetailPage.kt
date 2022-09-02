@@ -1,4 +1,4 @@
-package com.poke.pokewikicompose.ui.search
+package com.poke.pokewikicompose.ui.detail
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -30,12 +30,14 @@ import com.poke.pokewikicompose.R
 import com.poke.pokewikicompose.dataBase.data.bean.PokemonDetailBean
 import com.poke.pokewikicompose.ui.SNACK_ERROR
 import com.poke.pokewikicompose.ui.SNACK_SUCCESS
+import com.poke.pokewikicompose.ui.detail.info.InfoPage
 import com.poke.pokewikicompose.ui.popupSnackBar
 import com.poke.pokewikicompose.ui.theme.BackGround
 import com.poke.pokewikicompose.ui.widget.BottomNaviBar
 import com.poke.pokewikicompose.ui.widget.NaviItem
 import com.poke.pokewikicompose.ui.widget.PokemonTag
 import com.poke.pokewikicompose.ui.widget.WarpLoadingDialog
+import com.poke.pokewikicompose.utils.getColorByText
 import com.poke.pokewikicompose.utils.getPokemonColor
 import com.zj.mvi.core.observeEvent
 import com.zj.mvi.core.observeState
@@ -61,6 +63,7 @@ fun DetailPage(
 
     val pageStates = rememberPagerState(0)
     val curPage = remember { mutableStateOf(pageStates.currentPage) }
+    val curEvoIndex = remember { mutableStateOf(0) }
 
     LaunchedEffect(Unit) {
         itemList.add(NaviItem(R.drawable.pokemon_info, "信息"))
@@ -72,6 +75,11 @@ fun DetailPage(
                 is DetailPageViewEvents.TransDetail -> {
                     pokeDetail.value = it.pokeDetail
                     isInit.value = true
+
+                    val curPokemon =
+                        it.pokeDetail.poke_intro.poke_evolution.filter { item -> item.id == pokemonID }[0]
+                    curEvoIndex.value = it.pokeDetail.poke_intro.poke_evolution.indexOf(curPokemon)
+
                 }
                 is DetailPageViewEvents.ShowLoadingDialog -> isShowLoading.value = true
                 is DetailPageViewEvents.DismissLoadingDialog -> isShowLoading.value = false
@@ -217,7 +225,9 @@ fun DetailPage(
                         modifier = Modifier
                             .padding(horizontal = 110.dp)
                             .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = if (pokeDetail.value.pokemon_type.size > 1)
+                            Arrangement.SpaceBetween
+                        else Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         items(pokeDetail.value.pokemon_type) {
@@ -236,12 +246,20 @@ fun DetailPage(
                     count = 3,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f),
-                    state = pageStates
+                        .weight(1f)
+                        .padding(top = 10.dp),
+                    state = pageStates,
+                    verticalAlignment = Alignment.Top
                 ) { page ->
-                    curPage.value = pageStates.currentPage
-                    when (page) {
-
+                    if (isInit.value) {
+                        curPage.value = pageStates.currentPage
+                        when (page) {
+                            0 -> InfoPage(
+                                getColorByText(pokeDetail.value.pokemon_type[0]),
+                                pokeDetail.value.poke_intro,
+                                curEvoIndex.value
+                            )
+                        }
                     }
                 }
                 Box(
@@ -298,7 +316,7 @@ fun DetailPage(
 
 @Composable
 @Preview
-fun preview() {
+private fun DetailPreview() {
     DetailPage(
         pokemonID = 1,
         scaffoldState = rememberScaffoldState(),

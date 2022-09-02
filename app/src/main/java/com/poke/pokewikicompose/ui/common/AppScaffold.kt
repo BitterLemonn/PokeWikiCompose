@@ -22,6 +22,8 @@ import androidx.navigation.navArgument
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.poke.pokewikicompose.ui.AppSnackBar
 import com.poke.pokewikicompose.ui.cover.CoverPage
+import com.poke.pokewikicompose.ui.detail.DetailPage
+import com.poke.pokewikicompose.ui.detail.info.InfoPage
 import com.poke.pokewikicompose.ui.edit.password.PasswordEditPage
 import com.poke.pokewikicompose.ui.edit.profile.ProfileEditPage
 import com.poke.pokewikicompose.ui.login.LoginPage
@@ -30,14 +32,12 @@ import com.poke.pokewikicompose.ui.main.about.AboutPage
 import com.poke.pokewikicompose.ui.main.profile.ProfilePage
 import com.poke.pokewikicompose.ui.main.searchMain.SearchMainPage
 import com.poke.pokewikicompose.ui.register.RegisterPage
-import com.poke.pokewikicompose.ui.search.DetailPage
 import com.poke.pokewikicompose.utils.*
 
 @Composable
 fun AppScaffold() {
     val navController = rememberNavController()
     val scaffoldState = rememberScaffoldState()
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
 
     val mainPageList = listOf<@Composable () -> Unit>(
         { AboutPage(scaffoldState, navController) },
@@ -149,7 +149,11 @@ fun AppScaffold() {
                 )
                 val argument = requireNotNull(it.arguments)
                 val id = argument.getInt("pokemonID")
-                DetailPage(pokemonID = id, navCtrl = navController, scaffoldState = scaffoldState)
+                DetailPage(
+                    pokemonID = id,
+                    navCtrl = navController,
+                    scaffoldState = scaffoldState
+                )
             }
         }
     }

@@ -8,6 +8,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,6 +29,10 @@ fun InfoPage(
     evoIndex: Int = 0,
     onEvoItemClick: (Int) -> Unit = {}
 ) {
+    val rememberIndex = remember { mutableStateOf(evoIndex) }
+    LaunchedEffect(evoIndex) {
+        rememberIndex.value = evoIndex
+    }
     val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
@@ -35,7 +42,7 @@ fun InfoPage(
     ) {
         EvolutionBar(
             itemList = introBean.poke_evolution,
-            nowIndex = evoIndex,
+            nowIndex = rememberIndex.value,
             onItemClick = { onEvoItemClick.invoke(it) }
         )
         Spacer(modifier = Modifier.height(10.dp))

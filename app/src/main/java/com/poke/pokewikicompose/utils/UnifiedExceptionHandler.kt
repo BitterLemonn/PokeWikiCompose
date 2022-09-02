@@ -25,6 +25,7 @@ object UnifiedExceptionHandler {
     suspend fun <T> nullableHandleSuspend(function: suspend () -> NullableResponseData<T>): NetworkState<T> {
         return try {
             val result = function.invoke()
+            Logger.d("result: $result")
             when (result.status) {
                 200 -> {
                     result.data?.let {

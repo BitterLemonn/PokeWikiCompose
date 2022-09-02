@@ -8,6 +8,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,6 +29,10 @@ fun EvolutionBar(
     nowIndex: Int = 0,
     onItemClick: (Int) -> Unit = {}
 ) {
+    val rememberIndex = remember { mutableStateOf(nowIndex) }
+    LaunchedEffect(nowIndex) {
+        rememberIndex.value = nowIndex
+    }
     LazyRow(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 25.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -40,8 +47,8 @@ fun EvolutionBar(
                         Image(
                             modifier = Modifier
                                 .size(50.dp)
-                                .clickable { onItemClick.invoke(itemList.indexOf(item)) },
-                            painter = if (nowIndex != itemList.indexOf(item))
+                                .clickable { onItemClick.invoke(item.id) },
+                            painter = if (rememberIndex.value != itemList.indexOf(item))
                                 painterResource(R.drawable.pokemon_evu_unselect_bg)
                             else
                                 painterResource(R.drawable.pokemon_detail_bg),

@@ -40,7 +40,6 @@ import com.poke.pokewikicompose.ui.widget.WarpLoadingDialog
 import com.poke.pokewikicompose.utils.getColorByText
 import com.poke.pokewikicompose.utils.getPokemonColor
 import com.zj.mvi.core.observeEvent
-import com.zj.mvi.core.observeState
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPagerApi::class)
@@ -65,6 +64,16 @@ fun DetailPage(
     val curPage = remember { mutableStateOf(pageStates.currentPage) }
     val curEvoIndex = remember { mutableStateOf(0) }
 
+    LaunchedEffect(pokeDetail.value) {
+        if (pokeDetail.value.pokemon_type.size != 0) {
+            val detail = pokeDetail.value
+            val curPokemon =
+                detail.poke_intro.poke_evolution.filter { item -> item.id == pokemonID }[0]
+            curEvoIndex.value = detail.poke_intro.poke_evolution.indexOf(curPokemon)
+            isLike.value = detail.is_star == 1
+        }
+    }
+
     LaunchedEffect(Unit) {
         itemList.add(NaviItem(R.drawable.pokemon_info, "信息"))
         itemList.add(NaviItem(R.drawable.pokemon_state, "状态"))
@@ -75,11 +84,6 @@ fun DetailPage(
                 is DetailPageViewEvents.TransDetail -> {
                     pokeDetail.value = it.pokeDetail
                     isInit.value = true
-
-                    val curPokemon =
-                        it.pokeDetail.poke_intro.poke_evolution.filter { item -> item.id == pokemonID }[0]
-                    curEvoIndex.value = it.pokeDetail.poke_intro.poke_evolution.indexOf(curPokemon)
-
                 }
                 is DetailPageViewEvents.ShowLoadingDialog -> isShowLoading.value = true
                 is DetailPageViewEvents.DismissLoadingDialog -> isShowLoading.value = false
@@ -93,20 +97,18 @@ fun DetailPage(
                     coroutineScope,
                     scaffoldState,
                     SNACK_SUCCESS,
-                    "收藏成功"
+                    if (isLike.value) "收藏成功"
+                    else "取消收藏成功"
                 )
-                is DetailPageViewEvents.LikeActionFailure -> popupSnackBar(
-                    coroutineScope,
-                    scaffoldState,
-                    SNACK_ERROR,
-                    it.msg
-                )
-            }
-        }
-
-        viewModel.viewStates.let { states ->
-            states.observeState(lifecycleOwner, DetailPageViewStates::isLike) {
-                isLike.value = it
+                is DetailPageViewEvents.LikeActionFailure -> {
+                    popupSnackBar(
+                        coroutineScope,
+                        scaffoldState,
+                        SNACK_ERROR,
+                        it.msg
+                    )
+                    isLike.value = !isLike.value
+                }
             }
         }
         viewModel.dispatch(DetailPageViewActions.GetDetailWithID(pokemonID))
@@ -164,7 +166,8 @@ fun DetailPage(
                     ),
                     elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
                     onClick = {
-                        viewModel.dispatch(DetailPageViewActions.ClickLike)
+                        viewModel.dispatch(DetailPageViewActions.ClickLike(isLike.value))
+                        isLike.value = !isLike.value
                     },
                     contentPadding = PaddingValues()
                 ) {
@@ -258,7 +261,9 @@ fun DetailPage(
                                 getColorByText(pokeDetail.value.pokemon_type[0]),
                                 pokeDetail.value.poke_intro,
                                 curEvoIndex.value
-                            )
+                            ) {
+                                viewModel.dispatch(DetailPageViewActions.GetDetailWithID(it))
+                            }
                         }
                     }
                 }

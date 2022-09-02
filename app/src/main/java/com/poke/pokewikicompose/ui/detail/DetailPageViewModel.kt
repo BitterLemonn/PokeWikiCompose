@@ -15,8 +15,6 @@ import kotlinx.coroutines.launch
 
 class DetailPageViewModel : ViewModel() {
     private val repository = DetailRepository.getInstance()
-    private val _viewStates = MutableStateFlow(DetailPageViewStates())
-    val viewStates = _viewStates.asStateFlow()
     private val _viewEvents = SharedFlowEvents<DetailPageViewEvents>()
     val viewEvents = _viewEvents.asSharedFlow()
 
@@ -24,16 +22,15 @@ class DetailPageViewModel : ViewModel() {
 
     fun dispatch(viewActions: DetailPageViewActions) {
         when (viewActions) {
-            is DetailPageViewActions.ClickLike -> clickLike()
+            is DetailPageViewActions.ClickLike -> clickLike(viewActions.isLike)
             is DetailPageViewActions.GetDetailWithID -> getDetail(viewActions.pokemonID)
         }
     }
 
-    private fun clickLike() {
-        _viewStates.setState { copy(isLike = !isLike) }
+    private fun clickLike(isLike: Boolean) {
         viewModelScope.launch {
             flow {
-                clickLikeLogic()
+                clickLikeLogic(isLike)
                 emit("修改成功")
             }.onStart {
                 _viewEvents.setEvent(DetailPageViewEvents.ShowLoadingDialog)
@@ -48,19 +45,14 @@ class DetailPageViewModel : ViewModel() {
         }
     }
 
-    private suspend fun clickLikeLogic() {
-        val isLike = _viewStates.value.isLike
+    private suspend fun clickLikeLogic(isLike: Boolean) {
         val userID = AppContext.userData.userId.toString()
-        when (repository.clickLike(userID, pokemonID, isLike)) {
+        when (val result = repository.clickLike(userID, pokemonID, !isLike)) {
             is NetworkState.Success -> _viewEvents.setEvent(DetailPageViewEvents.LikeActionSuccess)
-            else -> {
-                _viewStates.setState { copy(isLike = !isLike) }
-                _viewEvents.setEvent(
-                    DetailPageViewEvents.LikeActionFailure(
-                        if (isLike) "收藏失败" else "取消收藏失败"
-                    )
-                )
+            is NetworkState.Error -> {
+                _viewEvents.setEvent(DetailPageViewEvents.LikeActionFailure(result.msg))
             }
+            is NetworkState.NoNeedResponse -> _viewEvents.setEvent(DetailPageViewEvents.LikeActionSuccess)
         }
     }
 
@@ -93,12 +85,8 @@ class DetailPageViewModel : ViewModel() {
     }
 }
 
-data class DetailPageViewStates(
-    val isLike: Boolean = false
-)
-
 sealed class DetailPageViewActions {
-    object ClickLike : DetailPageViewActions()
+    data class ClickLike(val isLike: Boolean) : DetailPageViewActions()
     data class GetDetailWithID(val pokemonID: Int) : DetailPageViewActions()
 }
 

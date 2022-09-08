@@ -52,7 +52,7 @@ class SearchMainViewModel : ViewModel() {
         when (val result = repository.getAllPokemonWithPage(page)) {
             is NetworkState.Success -> {
                 result.data?.let {
-                    _viewStates.setState { copy(page = page + 1, pokemonItemList = it) }
+                    _viewStates.setState { copy(page = page + 1, pokemonItemUpdate = it) }
                 } ?: result.msg?.let { _viewEvents.setEvent(SearchMainViewEvent.ShowToast(it)) }
             }
             is NetworkState.Error -> throw Exception(result.msg)
@@ -63,7 +63,7 @@ class SearchMainViewModel : ViewModel() {
 data class SearchMainViewState(
     val page: Int = 1,
     val loadingState: Int = INIT,
-    val pokemonItemList: ArrayList<PokemonSearchBean> = ArrayList()
+    val pokemonItemUpdate: ArrayList<PokemonSearchBean> = ArrayList()
 )
 
 sealed class SearchMainViewAction {

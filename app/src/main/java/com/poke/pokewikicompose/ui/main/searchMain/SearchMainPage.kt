@@ -11,6 +11,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,11 +56,17 @@ fun SearchMainPage(
 
     var isFirstInit by rememberSaveable { mutableStateOf(true) }
     var loading by remember { mutableStateOf(false) }
-    var nowSeenIndex by remember { mutableStateOf(0) }
-    var nowSeenOffset by remember { mutableStateOf(0) }
-    val dataList = remember { mutableStateListOf<PokemonSearchBean>() }
+
+    val listSaver = listSaver<MutableList<PokemonSearchBean>, PokemonSearchBean>(
+        save = { it.toList() },
+        restore = { it.toMutableList() }
+    )
+    val dataList = rememberSaveable(saver = listSaver) { mutableStateListOf() }
+
     val lazyState = rememberLazyListState()
     val lifecycleOwner = LocalLifecycleOwner.current
+    var nowSeenIndex by rememberSaveable { mutableStateOf(0) }
+    var nowSeenOffset by rememberSaveable { mutableStateOf(0) }
 
     rememberSystemUiController().setStatusBarColor(
         PokeBallRed,
@@ -77,17 +84,30 @@ fun SearchMainPage(
             }
         }
         viewStates.let { states ->
-            states.observeState(lifecycleOwner, SearchMainViewState::pokemonItemList) {
-                dataList.addAll(it)
+            states.observeState(lifecycleOwner, SearchMainViewState::pokemonItemUpdate) {
+                // 防止重复添加
+                if (!dataList.containsAll(it))
+                    dataList.addAll(it)
+                // 移动位置
                 coroutineState.launch {
-                    Logger.d("index: $nowSeenIndex offset:$nowSeenOffset")
                     lazyState.scrollToItem(nowSeenIndex, nowSeenOffset)
                 }
             }
         }
+        // 移动到指定位置
+        coroutineState.launch {
+            lazyState.scrollToItem(nowSeenIndex, nowSeenOffset)
+        }
         if (isFirstInit) {
             viewModel.dispatch(SearchMainViewAction.GetData)
             isFirstInit = false
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            nowSeenIndex = lazyState.firstVisibleItemIndex
+            nowSeenOffset = lazyState.firstVisibleItemScrollOffset
         }
     }
 
@@ -140,11 +160,12 @@ fun SearchMainPage(
                     .width((222 + (268 - 222) * progress + 20).dp)
             ) {
                 PokeBallSearchBar(
-                    value = "",  // TODO
-                    onValueChange = {
-                        // TODO
-                    },
-                    onClick = { Logger.e("", "SearchMainPage: 点击了搜索") }
+                    value = "",
+                    onValueChange = {},
+                    onClick = {
+                        // TODO 跳转搜索页
+                        Logger.d("SearchMainPage: 点击了搜索")
+                    }
                 )
             }
 
@@ -169,6 +190,8 @@ fun SearchMainPage(
                 if (!loading && dataList.size > 0) {
                     items(items = dataList) {
                         PokemonSearchCard(it) {
+                            nowSeenIndex = lazyState.firstVisibleItemIndex
+                            nowSeenOffset = lazyState.firstVisibleItemScrollOffset
                             navCtrl.navigate("$DETAIL_PAGE/${it.pokemon_id}")
                         }
                         Spacer(Modifier.height(10.dp))

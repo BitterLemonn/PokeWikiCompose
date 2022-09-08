@@ -57,13 +57,14 @@ class ProfileEditViewModel : ViewModel() {
         val username = _viewStates.value.username
         when (val result = repository.changeUserName(username, userID.toString(), token)) {
             is NetworkState.Success -> {
-                AppContext.userData = result.data
-                // Room持久化储存
-                GlobalDataBase.database.userDao().deleteAll()
-                GlobalDataBase.database.userDao().insert(result.data)
+                result.data?.let {
+                    AppContext.userData = it
+                    // Room持久化储存
+                    GlobalDataBase.database.userDao().deleteAll()
+                    GlobalDataBase.database.userDao().insert(it)
+                } ?: result.msg?.let { _viewEvents.setEvent(ProfileEditViewEvents.ShowToast(it)) }
             }
             is NetworkState.Error -> throw Exception(result.msg)
-            is NetworkState.NoNeedResponse -> throw Exception(result.msg)
         }
     }
 
@@ -102,7 +103,6 @@ class ProfileEditViewModel : ViewModel() {
                     GlobalDataBase.database.userDao().insert(AppContext.userData)
                 }
                 is NetworkState.Error -> throw Exception(result.msg)
-                is NetworkState.NoNeedResponse -> throw Exception(result.msg)
             }
         } else
             throw Exception("无法获取文件信息,请重试")
@@ -123,6 +123,6 @@ sealed class ProfileEditViewEvents {
     object ShowLoadingDialog : ProfileEditViewEvents()
     object DismissLoadingDialog : ProfileEditViewEvents()
     object SuccessChangeName : ProfileEditViewEvents()
-    object SuccessChangeIcon: ProfileEditViewEvents()
+    object SuccessChangeIcon : ProfileEditViewEvents()
     data class ShowToast(val msg: String) : ProfileEditViewEvents()
 }

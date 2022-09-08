@@ -72,9 +72,14 @@ fun getColorByText(text: String): Color {
 object JsonConverter {
     @OptIn(ExperimentalSerializationApi::class)
     val Json: Json = Json {
+        // 忽略实体类中未出现的json键值
         ignoreUnknownKeys = true
+        // 忽略实体类空值
         explicitNulls = false
+        // 不编码默认值
         encodeDefaults = false
+        // 忽略json空值
+        coerceInputValues = true
     }
 }
 

@@ -23,10 +23,10 @@ class DetailRepository {
 
     suspend fun clickLike(userID: String, pokeID: Int, like: Boolean): NetworkState<Any> {
         return if (like)
-            UnifiedExceptionHandler.nullableHandleSuspend {
+            UnifiedExceptionHandler.handleSuspend {
                 ServerApi.create().like(user_id = userID, poke_id = pokeID)
             } else
-            UnifiedExceptionHandler.nullableHandleSuspend {
+            UnifiedExceptionHandler.handleSuspend {
                 ServerApi.create().unlike(user_id = userID, poke_id = pokeID)
             }
     }

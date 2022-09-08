@@ -22,7 +22,7 @@ class PasswordEditRepository {
         userID: Int,
         token: String
     ): NetworkState<UserBean> {
-        return UnifiedExceptionHandler.nullableHandleSuspend {
+        return UnifiedExceptionHandler.handleSuspend {
             ServerApi.create().updatePassword(
                 oldPassword = md5(oldPassword),
                 newPassword = md5(newPassword),

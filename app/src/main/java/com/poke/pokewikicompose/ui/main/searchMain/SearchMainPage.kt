@@ -5,12 +5,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,23 +53,23 @@ fun SearchMainPage(
     val progress = collapsingState.toolbarState.progress
     val viewStates = viewModel.viewStates
 
-    val isFirstInit = rememberSaveable { mutableStateOf(true) }
-    val loading = remember { mutableStateOf(false) }
+    var isFirstInit by rememberSaveable { mutableStateOf(true) }
+    var loading by remember { mutableStateOf(false) }
+    var nowSeenIndex by remember { mutableStateOf(0) }
+    var nowSeenOffset by remember { mutableStateOf(0) }
     val dataList = remember { mutableStateListOf<PokemonSearchBean>() }
+    val lazyState = rememberLazyListState()
     val lifecycleOwner = LocalLifecycleOwner.current
+
     rememberSystemUiController().setStatusBarColor(
         PokeBallRed,
         darkIcons = MaterialTheme.colors.isLight
     )
     LaunchedEffect(Unit) {
-        if (isFirstInit.value) {
-            viewModel.dispatch(SearchMainViewAction.GetData)
-            isFirstInit.value = false
-        }
         viewModel.viewEvents.observeEvent(lifecycleOwner) {
             when (it) {
-                is SearchMainViewEvent.ShowLoadingDialog -> loading.value = true
-                is SearchMainViewEvent.DismissLoadingDialog -> loading.value = false
+                is SearchMainViewEvent.ShowLoadingDialog -> loading = true
+                is SearchMainViewEvent.DismissLoadingDialog -> loading = false
                 is SearchMainViewEvent.ShowToast ->
                     coroutineState.launch {
                         scaffoldState.snackbarHostState.showSnackbar(message = it.msg)
@@ -79,7 +79,15 @@ fun SearchMainPage(
         viewStates.let { states ->
             states.observeState(lifecycleOwner, SearchMainViewState::pokemonItemList) {
                 dataList.addAll(it)
+                coroutineState.launch {
+                    Logger.d("index: $nowSeenIndex offset:$nowSeenOffset")
+                    lazyState.scrollToItem(nowSeenIndex, nowSeenOffset)
+                }
             }
+        }
+        if (isFirstInit) {
+            viewModel.dispatch(SearchMainViewAction.GetData)
+            isFirstInit = false
         }
     }
 
@@ -142,27 +150,30 @@ fun SearchMainPage(
 
         }
     ) {
-        if (loading.value)
+        if (loading)
             WarpLoadingDialog(text = "正在加载", backgroundAlpha = 0.1f)
         LazyLoadMoreColumn(
-            loadState = loading.value,
+            loadState = loading,
             onLoad = {
+                nowSeenIndex = lazyState.firstVisibleItemIndex
+                nowSeenOffset = lazyState.firstVisibleItemScrollOffset
                 viewModel.dispatch(SearchMainViewAction.GetData)
             }
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
                 contentPadding = PaddingValues(vertical = 10.dp, horizontal = 5.dp),
-                verticalArrangement = Arrangement.SpaceEvenly
+                verticalArrangement = Arrangement.SpaceEvenly,
+                state = lazyState
             ) {
-                if (!loading.value && dataList.size > 0) {
+                if (!loading && dataList.size > 0) {
                     items(items = dataList) {
                         PokemonSearchCard(it) {
                             navCtrl.navigate("$DETAIL_PAGE/${it.pokemon_id}")
                         }
                         Spacer(Modifier.height(10.dp))
                     }
-                } else if (dataList.size == 0)
+                } else if (dataList.size == 0 && !loading)
                     item {
                         Text(
                             text = "暂无相关搜索结果~",

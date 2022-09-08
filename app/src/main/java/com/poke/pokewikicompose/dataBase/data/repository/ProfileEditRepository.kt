@@ -26,7 +26,7 @@ class ProfileEditRepository {
         userId: String,
         token: String
     ): NetworkState<UserBean> {
-        return UnifiedExceptionHandler.nullableHandleSuspend {
+        return UnifiedExceptionHandler.handleSuspend {
             ServerApi.create().updateUsername(username = userName, userId = userId, token = token)
         }
     }
@@ -42,7 +42,7 @@ class ProfileEditRepository {
             .setType(MultipartBody.FORM)
             .build()
 
-        return UnifiedExceptionHandler.nullableHandleSuspend {
+        return UnifiedExceptionHandler.handleSuspend {
             ServerApi.create().updateUserIcon(part)
         }
     }

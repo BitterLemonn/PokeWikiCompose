@@ -5,7 +5,6 @@ import com.poke.pokewikicompose.dataBase.data.bean.PokemonDetailBean
 import com.poke.pokewikicompose.dataBase.data.bean.PokemonSearchBean
 import com.poke.pokewikicompose.dataBase.data.bean.UserBean
 import com.poke.pokewikicompose.utils.JsonConverter.Json
-import com.poke.pokewikicompose.utils.NullableResponseData
 import com.poke.pokewikicompose.utils.ResponseData
 import com.poke.pokewikicompose.utils.SERVER_URL
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -27,14 +26,14 @@ interface ServerApi {
     suspend fun getAuth(
         @Field("email") email: String,
         @Field("password") password: String
-    ): NullableResponseData<UserBean>
+    ): ResponseData<UserBean>
 
     @POST("reg")
     @FormUrlEncoded
     suspend fun register(
         @Field("email") email: String,
         @Field("password") password: String
-    ): NullableResponseData<UserBean>
+    ): ResponseData<UserBean>
 
     @POST("selectAllPokeIntro")
     @FormUrlEncoded
@@ -58,14 +57,14 @@ interface ServerApi {
     suspend fun like(
         @Field("userId") user_id: String,
         @Field("pokemon_id") poke_id: Int
-    ): NullableResponseData<String>
+    ): ResponseData<String>
 
     @POST("cancelUserStar")
     @FormUrlEncoded
     suspend fun unlike(
         @Field("userId") user_id: String,
         @Field("pokemon_id") poke_id: Int
-    ): NullableResponseData<String>
+    ): ResponseData<String>
 
     @POST("searchPokeByName")
     @FormUrlEncoded
@@ -91,7 +90,7 @@ interface ServerApi {
         @Field("newusername") username: String,
         @Field("userId") userId: String,
         @Field("token") token: String
-    ): NullableResponseData<UserBean>
+    ): ResponseData<UserBean>
 
     @POST("updatePassword")
     @FormUrlEncoded
@@ -100,12 +99,12 @@ interface ServerApi {
         @Field("newPassword") newPassword: String,
         @Field("userId") userId: String,
         @Field("token") token: String
-    ): NullableResponseData<UserBean>
+    ): ResponseData<UserBean>
 
     @POST("changeProfilePicture")
     suspend fun updateUserIcon(
         @Body multipartBody: MultipartBody
-    ): NullableResponseData<String>
+    ): ResponseData<String>
 
     @POST("getUserFavorite")
     @FormUrlEncoded

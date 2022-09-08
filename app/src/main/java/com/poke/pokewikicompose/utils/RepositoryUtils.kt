@@ -9,9 +9,7 @@ import kotlinx.serialization.Serializable
  * @param msg 响应体返回的信息
  */
 @Serializable
-data class ResponseData<T>(val status: Int, val data: T, val msg: String?)
-@Serializable
-data class NullableResponseData<T>(val status: Int, val data: T?, val msg: String?)
+data class ResponseData<T>(val status: Int, val data: T? = null, val msg: String?)
 
 /**
  * 响应处理包装通用类
@@ -21,7 +19,6 @@ data class NullableResponseData<T>(val status: Int, val data: T?, val msg: Strin
  * @param T 响应体包含的数据的类型
  */
 sealed class NetworkState<out T> {
-    data class Success<T>(val data: T) : NetworkState<T>()
+    data class Success<T>(val data: T? = null, val msg: String? = null) : NetworkState<T>()
     data class Error<T>(val msg: String) : NetworkState<T>()
-    data class NoNeedResponse<T>(val msg: String): NetworkState<T>()
 }

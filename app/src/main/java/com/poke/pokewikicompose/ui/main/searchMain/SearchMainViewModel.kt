@@ -50,10 +50,12 @@ class SearchMainViewModel : ViewModel() {
     private suspend fun getDataLogic() {
         val page = _viewStates.value.page
         when (val result = repository.getAllPokemonWithPage(page)) {
-            is NetworkState.Success ->
-                _viewStates.setState { copy(page = page + 1, pokemonItemList = result.data) }
+            is NetworkState.Success -> {
+                result.data?.let {
+                    _viewStates.setState { copy(page = page + 1, pokemonItemList = it) }
+                } ?: result.msg?.let { _viewEvents.setEvent(SearchMainViewEvent.ShowToast(it)) }
+            }
             is NetworkState.Error -> throw Exception(result.msg)
-            else -> {}
         }
     }
 }

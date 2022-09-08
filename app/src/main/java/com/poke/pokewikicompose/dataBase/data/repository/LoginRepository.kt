@@ -16,6 +16,6 @@ class LoginRepository {
     }
 
     suspend fun getAuth(email: String, password: String): NetworkState<UserBean> {
-        return UnifiedExceptionHandler.nullableHandleSuspend { ServerApi.create().getAuth(email, password) }
+        return UnifiedExceptionHandler.handleSuspend { ServerApi.create().getAuth(email, password) }
     }
 }

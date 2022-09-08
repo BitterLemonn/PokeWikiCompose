@@ -179,7 +179,10 @@ fun RegisterPage(
             Spacer(modifier = Modifier.height(106.dp))
             // 注册按钮
             Button(
-                onClick = { viewModel.dispatch(RegisterViewAction.OnRegisterClicked) },
+                onClick = {
+                    keyboardController?.hide()
+                    viewModel.dispatch(RegisterViewAction.OnRegisterClicked)
+                },
                 enabled = enable.value,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)

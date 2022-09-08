@@ -56,21 +56,22 @@ class RegisterViewModel : ViewModel() {
     private suspend fun registerLogic() {
         when (val result = repository.register(viewStates.value.email, viewStates.value.password)) {
             is NetworkState.Success -> {
-                _viewEvents.setEvent(RegisterViewEvent.TransIntent)
-                //写入全局
-                AppContext.userData = result.data
-                //Room持久化
-                GlobalDataBase.database.userDao().deleteAll()
-                GlobalDataBase.database.userDao().insert(result.data)
-                GlobalDataBase.database.localSettingDao().insertLocalSetting(
-                    LocalSetting(
-                        userId = result.data.userId,
-                        isAutoCache = false
+                result.data?.let {
+                    _viewEvents.setEvent(RegisterViewEvent.TransIntent)
+                    //写入全局
+                    AppContext.userData = it
+                    //Room持久化
+                    GlobalDataBase.database.userDao().deleteAll()
+                    GlobalDataBase.database.userDao().insert(it)
+                    GlobalDataBase.database.localSettingDao().insertLocalSetting(
+                        LocalSetting(
+                            userId = it.userId,
+                            isAutoCache = false
+                        )
                     )
-                )
+                } ?: result.msg?.let { _viewEvents.setEvent(RegisterViewEvent.ShowToast(it)) }
             }
             is NetworkState.Error -> throw Exception(result.msg)
-            is NetworkState.NoNeedResponse -> throw Exception(result.msg)
         }
     }
 }

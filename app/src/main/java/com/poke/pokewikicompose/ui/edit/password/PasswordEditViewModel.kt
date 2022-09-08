@@ -56,14 +56,15 @@ class PasswordEditViewModel : ViewModel() {
 
         when (val result = repository.updateUserPassword(oldPassword, newPassword, userID, token)) {
             is NetworkState.Success -> {
-                _viewEvents.setEvent(PasswordEditViewEvents.SuccessChange)
-                AppContext.userData = result.data
-                //Room持久化
-                GlobalDataBase.database.userDao().deleteAll()
-                GlobalDataBase.database.userDao().insert(result.data)
+                result.data?.let {
+                    _viewEvents.setEvent(PasswordEditViewEvents.SuccessChange)
+                    AppContext.userData = result.data
+                    //Room持久化
+                    GlobalDataBase.database.userDao().deleteAll()
+                    GlobalDataBase.database.userDao().insert(result.data)
+                } ?: _viewEvents.setEvent(PasswordEditViewEvents.ShowToast(result.msg ?: ""))
             }
             is NetworkState.Error -> throw Exception(result.msg)
-            is NetworkState.NoNeedResponse -> throw Exception(result.msg)
         }
     }
 }

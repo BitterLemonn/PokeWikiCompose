@@ -62,24 +62,25 @@ class LoginViewModel : ViewModel() {
         when (val result = repository.getAuth(email, md5(password))) {
             is NetworkState.Success -> {
                 _viewEvent.setEvent(LoginViewEvent.TransIntent)
-                //写入全局
-                AppContext.userData = result.data
-                //Room持久化
-                GlobalDataBase.database.userDao().deleteAll()
-                GlobalDataBase.database.userDao().insert(result.data)
-                val setting = GlobalDataBase.database.localSettingDao()
-                    .getLocalSettingWithUserID(result.data.userId)
-                if (setting != null)
-                    GlobalDataBase.database.localSettingDao().updateLocalSetting(setting)
-                else
-                    GlobalDataBase.database.localSettingDao().insertLocalSetting(
-                        LocalSetting(
-                            userId = result.data.userId,
-                            isAutoCache = false
+                result.data?.let {
+                    //写入全局
+                    AppContext.userData = it
+                    //Room持久化
+                    GlobalDataBase.database.userDao().deleteAll()
+                    GlobalDataBase.database.userDao().insert(it)
+                    val setting = GlobalDataBase.database.localSettingDao()
+                        .getLocalSettingWithUserID(it.userId)
+                    if (setting != null)
+                        GlobalDataBase.database.localSettingDao().updateLocalSetting(setting)
+                    else
+                        GlobalDataBase.database.localSettingDao().insertLocalSetting(
+                            LocalSetting(
+                                userId = it.userId,
+                                isAutoCache = false
+                            )
                         )
-                    )
+                } ?: result.msg?.let { _viewEvent.setEvent(LoginViewEvent.ShowToast(it)) }
             }
-            is NetworkState.NoNeedResponse -> throw Exception(result.msg)
             is NetworkState.Error -> throw Exception(result.msg)
         }
     }

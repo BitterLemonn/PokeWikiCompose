@@ -8,7 +8,6 @@ import com.poke.pokewikicompose.utils.AppContext
 import com.poke.pokewikicompose.utils.NetworkState
 import com.zj.mvi.core.SharedFlowEvents
 import com.zj.mvi.core.setEvent
-import com.zj.mvi.core.setState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -52,7 +51,6 @@ class DetailPageViewModel : ViewModel() {
             is NetworkState.Error -> {
                 _viewEvents.setEvent(DetailPageViewEvents.LikeActionFailure(result.msg))
             }
-            is NetworkState.NoNeedResponse -> _viewEvents.setEvent(DetailPageViewEvents.LikeActionSuccess)
         }
     }
 
@@ -78,9 +76,12 @@ class DetailPageViewModel : ViewModel() {
     private suspend fun getDetailLogic(id: Int) {
         val userID = AppContext.userData.userId.toString()
         when (val result = repository.getDetail(pokeID = id, userID = userID)) {
-            is NetworkState.Success -> _viewEvents.setEvent(DetailPageViewEvents.TransDetail(result.data))
+            is NetworkState.Success -> {
+                result.data?.let {
+                    _viewEvents.setEvent(DetailPageViewEvents.TransDetail(it))
+                }
+            }
             is NetworkState.Error -> throw Exception(result.msg)
-            is NetworkState.NoNeedResponse -> throw Exception(result.msg)
         }
     }
 }

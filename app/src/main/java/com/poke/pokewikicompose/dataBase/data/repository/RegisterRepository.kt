@@ -18,7 +18,7 @@ class RegisterRepository {
 
     suspend fun register(email: String, password: String): NetworkState<UserBean> {
         val md5Password = md5(password)
-        return UnifiedExceptionHandler.nullableHandleSuspend {
+        return UnifiedExceptionHandler.handleSuspend {
             ServerApi.create().register(email, md5Password)
         }
     }

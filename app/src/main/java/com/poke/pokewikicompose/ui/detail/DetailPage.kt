@@ -26,11 +26,13 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.orhanobut.logger.Logger
 import com.poke.pokewikicompose.R
 import com.poke.pokewikicompose.dataBase.data.bean.PokemonDetailBean
 import com.poke.pokewikicompose.ui.SNACK_ERROR
 import com.poke.pokewikicompose.ui.SNACK_SUCCESS
 import com.poke.pokewikicompose.ui.detail.info.InfoPage
+import com.poke.pokewikicompose.ui.detail.state.StatePage
 import com.poke.pokewikicompose.ui.popupSnackBar
 import com.poke.pokewikicompose.ui.theme.BackGround
 import com.poke.pokewikicompose.ui.widget.BottomNaviBar
@@ -55,22 +57,18 @@ fun DetailPage(
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
 
-    val isLike = remember { mutableStateOf(false) }
-    val isInit = remember { mutableStateOf(false) }
-    val isShowLoading = remember { mutableStateOf(false) }
-    val pokeDetail = remember { mutableStateOf(PokemonDetailBean.getEmpty()) }
+    var isLike by remember { mutableStateOf(false) }
+    var isInit by remember { mutableStateOf(false) }
+    var isShowLoading by remember { mutableStateOf(false) }
+    var pokeDetail by remember { mutableStateOf(PokemonDetailBean.getEmpty()) }
 
     val pageStates = rememberPagerState(0)
-    val curPage = remember { mutableStateOf(pageStates.currentPage) }
-    val curEvoIndex = remember { mutableStateOf(0) }
+    var curPage by remember { mutableStateOf(pageStates.currentPage) }
 
-    LaunchedEffect(pokeDetail.value) {
-        if (pokeDetail.value.pokemon_type.size != 0) {
-            val detail = pokeDetail.value
-            val curPokemon =
-                detail.poke_intro.poke_evolution.filter { item -> item.id == pokemonID }[0]
-            curEvoIndex.value = detail.poke_intro.poke_evolution.indexOf(curPokemon)
-            isLike.value = detail.is_star == 1
+    LaunchedEffect(pokeDetail) {
+        if (pokeDetail.pokemon_type.size != 0) {
+            val detail = pokeDetail
+            isLike = detail.is_star == 1
         }
     }
 
@@ -82,11 +80,11 @@ fun DetailPage(
         viewModel.viewEvents.observeEvent(lifecycleOwner) {
             when (it) {
                 is DetailPageViewEvents.TransDetail -> {
-                    pokeDetail.value = it.pokeDetail
-                    isInit.value = true
+                    pokeDetail = it.pokeDetail
+                    isInit = true
                 }
-                is DetailPageViewEvents.ShowLoadingDialog -> isShowLoading.value = true
-                is DetailPageViewEvents.DismissLoadingDialog -> isShowLoading.value = false
+                is DetailPageViewEvents.ShowLoadingDialog -> isShowLoading = true
+                is DetailPageViewEvents.DismissLoadingDialog -> isShowLoading = false
                 is DetailPageViewEvents.ShowToast -> popupSnackBar(
                     coroutineScope,
                     scaffoldState,
@@ -97,7 +95,7 @@ fun DetailPage(
                     coroutineScope,
                     scaffoldState,
                     SNACK_SUCCESS,
-                    if (isLike.value) "收藏成功"
+                    if (isLike) "收藏成功"
                     else "取消收藏成功"
                 )
                 is DetailPageViewEvents.LikeActionFailure -> {
@@ -107,19 +105,19 @@ fun DetailPage(
                         SNACK_ERROR,
                         it.msg
                     )
-                    isLike.value = !isLike.value
+                    isLike = !isLike
                 }
             }
         }
         viewModel.dispatch(DetailPageViewActions.GetDetailWithID(pokemonID))
     }
     rememberSystemUiController().setSystemBarsColor(
-        getPokemonColor(pokeDetail.value.pokemon_color),
+        getPokemonColor(pokeDetail.pokemon_color),
         darkIcons = MaterialTheme.colors.isLight
     )
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = getPokemonColor(pokeDetail.value.pokemon_color)
+        color = getPokemonColor(pokeDetail.pokemon_color)
     ) {
         // toolbar
         Box(
@@ -166,12 +164,12 @@ fun DetailPage(
                     ),
                     elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
                     onClick = {
-                        viewModel.dispatch(DetailPageViewActions.ClickLike(isLike.value))
-                        isLike.value = !isLike.value
+                        viewModel.dispatch(DetailPageViewActions.ClickLike(isLike))
+                        isLike = !isLike
                     },
                     contentPadding = PaddingValues()
                 ) {
-                    if (!isLike.value)
+                    if (!isLike)
                         Image(
                             modifier = Modifier
                                 .size(30.dp),
@@ -199,7 +197,7 @@ fun DetailPage(
             elevation = 20.dp,
             color = BackGround
         ) {
-            if (isInit.value) {
+            if (isInit) {
                 // 标签
                 Column(
                     modifier = Modifier
@@ -208,7 +206,7 @@ fun DetailPage(
                     horizontalAlignment = Alignment.End
                 ) {
                     Box {
-                        PokemonTag(text = pokeDetail.value.pokemon_id)
+                        PokemonTag(text = pokeDetail.pokemon_id)
                     }
                 }
                 // 名字 属性
@@ -217,7 +215,7 @@ fun DetailPage(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = pokeDetail.value.pokemon_name,
+                        text = pokeDetail.pokemon_name,
                         fontSize = 20.sp,
                         color = Color.Black,
                         fontWeight = FontWeight.Bold,
@@ -228,12 +226,12 @@ fun DetailPage(
                         modifier = Modifier
                             .padding(horizontal = 110.dp)
                             .fillMaxWidth(),
-                        horizontalArrangement = if (pokeDetail.value.pokemon_type.size > 1)
+                        horizontalArrangement = if (pokeDetail.pokemon_type.size > 1)
                             Arrangement.SpaceBetween
                         else Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        items(pokeDetail.value.pokemon_type) {
+                        items(pokeDetail.pokemon_type) {
                             PokemonTag(text = it, isColored = true)
                         }
                     }
@@ -254,16 +252,18 @@ fun DetailPage(
                     state = pageStates,
                     verticalAlignment = Alignment.Top
                 ) { page ->
-                    if (isInit.value) {
-                        curPage.value = pageStates.currentPage
+                    if (isInit) {
+                        curPage = pageStates.currentPage
                         when (page) {
                             0 -> InfoPage(
-                                getColorByText(pokeDetail.value.pokemon_type[0]),
-                                pokeDetail.value.poke_intro,
-                                curEvoIndex.value
+                                getColorByText(pokeDetail.pokemon_type[0]),
+                                pokeDetail
                             ) {
                                 viewModel.dispatch(DetailPageViewActions.GetDetailWithID(it))
                             }
+                            1 -> StatePage(
+                                pokeDetail.poke_stat
+                            )
                         }
                     }
                 }
@@ -279,7 +279,7 @@ fun DetailPage(
                     )
                     BottomNaviBar(
                         itemList = itemList,
-                        chooseIndex = curPage.value
+                        chooseIndex = curPage
                     ) {
                         coroutineScope.launch { pageStates.scrollToPage(it) }
                     }
@@ -302,11 +302,11 @@ fun DetailPage(
                     painter = painterResource(R.drawable.pokemon_detail_bg),
                     contentDescription = "detail background"
                 )
-                if (isInit.value)
+                if (isInit)
                     AsyncImage(
                         modifier = Modifier
                             .size(150.dp),
-                        model = pokeDetail.value.img_url,
+                        model = pokeDetail.img_url,
                         contentDescription = "pokemon image"
                     )
             }
@@ -314,7 +314,7 @@ fun DetailPage(
 
 
     }
-    if (isShowLoading.value) {
+    if (isShowLoading) {
         WarpLoadingDialog(text = "正在获取")
     }
 }

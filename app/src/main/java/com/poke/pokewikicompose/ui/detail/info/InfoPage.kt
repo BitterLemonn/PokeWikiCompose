@@ -14,26 +14,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.poke.pokewikicompose.dataBase.data.bean.PokemonIntroBean
-import com.poke.pokewikicompose.ui.theme.Grass
+import com.poke.pokewikicompose.dataBase.data.bean.PokemonDetailBean
 import com.poke.pokewikicompose.ui.widget.EvolutionBar
 import com.poke.pokewikicompose.ui.widget.PokemonInfoText
 
 @Composable
 fun InfoPage(
     typeColor: Color,
-    introBean: PokemonIntroBean,
-    evoIndex: Int = 0,
+    pokeDetail: PokemonDetailBean,
     onEvoItemClick: (Int) -> Unit = {}
 ) {
-    val rememberIndex = remember { mutableStateOf(evoIndex) }
-    LaunchedEffect(evoIndex) {
-        rememberIndex.value = evoIndex
-    }
     val scrollState = rememberScrollState()
+    val evoIndex = remember { mutableStateOf(-1) }
+    val introBean = remember { pokeDetail.poke_intro }
+    LaunchedEffect(pokeDetail) {
+        val curPokemon = introBean.poke_evolution.find { item ->
+                item.id == pokeDetail.pokemon_id.toInt()
+            }
+        evoIndex.value = introBean.poke_evolution.indexOf(curPokemon)
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -42,7 +43,7 @@ fun InfoPage(
     ) {
         EvolutionBar(
             itemList = introBean.poke_evolution,
-            nowIndex = rememberIndex.value,
+            nowIndex = evoIndex.value,
             onItemClick = { onEvoItemClick.invoke(it) }
         )
         Spacer(modifier = Modifier.height(10.dp))
@@ -172,10 +173,4 @@ fun InfoPage(
         }
         Spacer(modifier = Modifier.height(30.dp))
     }
-}
-
-@Composable
-@Preview
-private fun InfoPagePreview() {
-    InfoPage(Grass, PokemonIntroBean())
 }

@@ -20,17 +20,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.orhanobut.logger.Logger
 import com.poke.pokewikicompose.R
 import com.poke.pokewikicompose.dataBase.data.bean.PokemonEvolutionBean
 
 @Composable
 fun EvolutionBar(
     itemList: List<PokemonEvolutionBean>,
-    nowIndex: Int = 0,
+    nowIndex: Int,
     onItemClick: (Int) -> Unit = {}
 ) {
     val rememberIndex = remember { mutableStateOf(nowIndex) }
     LaunchedEffect(nowIndex) {
+        Logger.d("now Index: $nowIndex")
         rememberIndex.value = nowIndex
     }
     LazyRow(
@@ -44,16 +46,23 @@ fun EvolutionBar(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Box(modifier = Modifier.size(50.dp)) {
-                        Image(
-                            modifier = Modifier
-                                .size(50.dp)
-                                .clickable { onItemClick.invoke(item.id) },
-                            painter = if (rememberIndex.value != itemList.indexOf(item))
-                                painterResource(R.drawable.pokemon_evu_unselect_bg)
-                            else
+                        if (rememberIndex.value != itemList.indexOf(item))
+                            Image(
+                                modifier = Modifier
+                                    .size(50.dp)
+                                    .clickable { onItemClick.invoke(item.id) },
+                                painter =
+                                painterResource(R.drawable.pokemon_evu_unselect_bg),
+                                contentDescription = ""
+                            )
+                        else
+                            Image(
+                                modifier = Modifier
+                                    .size(50.dp),
+                                painter =
                                 painterResource(R.drawable.pokemon_detail_bg),
-                            contentDescription = ""
-                        )
+                                contentDescription = ""
+                            )
                         AsyncImage(
                             modifier = Modifier.size(50.dp),
                             model = item.img_url,
@@ -116,5 +125,5 @@ private fun EvolutionBarPreview() {
             name = "妙蛙花"
         )
     )
-    EvolutionBar(list)
+    EvolutionBar(list, 1)
 }

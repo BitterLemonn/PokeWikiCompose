@@ -10,6 +10,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,7 +56,6 @@ fun SearchMainPage(
     val isFirstInit = rememberSaveable { mutableStateOf(true) }
     val loading = remember { mutableStateOf(false) }
     val dataList = remember { mutableStateListOf<PokemonSearchBean>() }
-
     val lifecycleOwner = LocalLifecycleOwner.current
     rememberSystemUiController().setStatusBarColor(
         PokeBallRed,

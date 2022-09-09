@@ -24,10 +24,7 @@ import com.poke.pokewikicompose.ui.theme.AppTheme
 import com.poke.pokewikicompose.ui.theme.BtnText
 import com.poke.pokewikicompose.ui.theme.Error
 import com.poke.pokewikicompose.ui.widget.ScreenItemBtn
-import com.poke.pokewikicompose.utils.AppContext
-import com.poke.pokewikicompose.utils.LOGIN_PAGE
-import com.poke.pokewikicompose.utils.MAIN_PAGE
-import com.poke.pokewikicompose.utils.PROFILE_EDIT_PAGE
+import com.poke.pokewikicompose.utils.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
@@ -127,7 +124,7 @@ fun ProfilePage(
                 text = "意见反馈",
                 isShowArrow = true
             ) {
-                // TODO 跳转意见反馈
+                navCtrl?.navigate(FEEDBACK_PAGE)
             }
             ScreenItemBtn(
                 modifier = Modifier.padding(horizontal = 20.dp),

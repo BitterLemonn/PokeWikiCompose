@@ -10,22 +10,20 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.poke.pokewikicompose.ui.AppSnackBar
 import com.poke.pokewikicompose.ui.cover.CoverPage
 import com.poke.pokewikicompose.ui.detail.DetailPage
-import com.poke.pokewikicompose.ui.detail.info.InfoPage
 import com.poke.pokewikicompose.ui.edit.password.PasswordEditPage
 import com.poke.pokewikicompose.ui.edit.profile.ProfileEditPage
+import com.poke.pokewikicompose.ui.feedback.FeedbackPage
 import com.poke.pokewikicompose.ui.login.LoginPage
 import com.poke.pokewikicompose.ui.main.MainPage
 import com.poke.pokewikicompose.ui.main.about.AboutPage
@@ -154,6 +152,14 @@ fun AppScaffold() {
                     navCtrl = navController,
                     scaffoldState = scaffoldState
                 )
+            }
+            composable(
+                route = FEEDBACK_PAGE
+            ) {
+                rememberSystemUiController().setNavigationBarColor(
+                    Color(0xFFEFEFEF), darkIcons = MaterialTheme.colors.isLight
+                )
+                FeedbackPage(navCtrl = navController, scaffoldState = scaffoldState)
             }
         }
     }

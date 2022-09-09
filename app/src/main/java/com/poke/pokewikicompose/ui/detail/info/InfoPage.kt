@@ -28,12 +28,13 @@ fun InfoPage(
 ) {
     val scrollState = rememberScrollState()
     val evoIndex = remember { mutableStateOf(-1) }
-    val introBean = remember { pokeDetail.poke_intro }
+    val introBean = remember { mutableStateOf(pokeDetail.poke_intro) }
     LaunchedEffect(pokeDetail) {
-        val curPokemon = introBean.poke_evolution.find { item ->
-                item.id == pokeDetail.pokemon_id.toInt()
-            }
-        evoIndex.value = introBean.poke_evolution.indexOf(curPokemon)
+        val curPokemon = introBean.value.poke_evolution.find { item ->
+            item.id == pokeDetail.pokemon_id.toInt()
+        }
+        evoIndex.value = introBean.value.poke_evolution.indexOf(curPokemon)
+        introBean.value = pokeDetail.poke_intro
     }
     Column(
         modifier = Modifier
@@ -42,7 +43,7 @@ fun InfoPage(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         EvolutionBar(
-            itemList = introBean.poke_evolution,
+            itemList = introBean.value.poke_evolution,
             nowIndex = evoIndex.value,
             onItemClick = { onEvoItemClick.invoke(it) }
         )
@@ -60,10 +61,10 @@ fun InfoPage(
                 PokemonInfoText(
                     color = typeColor,
                     topText = "类别",
-                    contentText = introBean.genus
+                    contentText = introBean.value.genus
                 )
             }
-            introBean.habitat?.let {
+            introBean.value.habitat?.let {
                 item {
                     Card(
                         modifier = Modifier.width(1.dp).fillMaxHeight().padding(vertical = 10.dp),
@@ -91,8 +92,8 @@ fun InfoPage(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             // 普通特性
-            for (ability in introBean.general_abilities) {
-                if (ability != introBean.general_abilities.first()) {
+            for (ability in introBean.value.general_abilities) {
+                if (ability != introBean.value.general_abilities.first()) {
                     item {
                         Card(
                             shape = RoundedCornerShape(2.dp),
@@ -113,8 +114,8 @@ fun InfoPage(
                 }
             }
             // 隐藏特性
-            introBean.hidden_abilities?.let {
-                for (ability in introBean.hidden_abilities) {
+            introBean.value.hidden_abilities?.let {
+                for (ability in introBean.value.hidden_abilities!!) {
                     item {
                         Card(
                             shape = RoundedCornerShape(2.dp),
@@ -148,13 +149,13 @@ fun InfoPage(
             item {
                 PokemonInfoText(
                     color = typeColor,
-                    contentText = introBean.shape,
+                    contentText = introBean.value.shape,
                     bottomText = "形状"
                 )
             }
         }
         Spacer(modifier = Modifier.height(20.dp))
-        introBean.intro_text?.let {
+        introBean.value.intro_text?.let {
             Card(
                 modifier = Modifier
                     .padding(horizontal = 30.dp, vertical = 10.dp)

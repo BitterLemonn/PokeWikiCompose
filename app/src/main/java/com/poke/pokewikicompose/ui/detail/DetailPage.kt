@@ -26,12 +26,12 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.orhanobut.logger.Logger
 import com.poke.pokewikicompose.R
 import com.poke.pokewikicompose.dataBase.data.bean.PokemonDetailBean
 import com.poke.pokewikicompose.ui.SNACK_ERROR
 import com.poke.pokewikicompose.ui.SNACK_SUCCESS
 import com.poke.pokewikicompose.ui.detail.info.InfoPage
+import com.poke.pokewikicompose.ui.detail.moves.MovesPage
 import com.poke.pokewikicompose.ui.detail.state.StatePage
 import com.poke.pokewikicompose.ui.popupSnackBar
 import com.poke.pokewikicompose.ui.theme.BackGround
@@ -263,6 +263,9 @@ fun DetailPage(
                             }
                             1 -> StatePage(
                                 pokeDetail.poke_stat
+                            )
+                            2 -> MovesPage(
+                                pokeDetail.poke_moves.moves.sortedBy { it.level }
                             )
                         }
                     }

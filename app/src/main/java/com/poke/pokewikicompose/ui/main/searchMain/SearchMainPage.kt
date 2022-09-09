@@ -88,10 +88,6 @@ fun SearchMainPage(
                 // 防止重复添加
                 if (!dataList.containsAll(it))
                     dataList.addAll(it)
-                // 移动位置
-                coroutineState.launch {
-                    lazyState.scrollToItem(nowSeenIndex, nowSeenOffset)
-                }
             }
         }
         // 移动到指定位置
@@ -176,8 +172,6 @@ fun SearchMainPage(
         LazyLoadMoreColumn(
             loadState = loading,
             onLoad = {
-                nowSeenIndex = lazyState.firstVisibleItemIndex
-                nowSeenOffset = lazyState.firstVisibleItemScrollOffset
                 viewModel.dispatch(SearchMainViewAction.GetData)
             }
         ) {
@@ -187,7 +181,7 @@ fun SearchMainPage(
                 verticalArrangement = Arrangement.SpaceEvenly,
                 state = lazyState
             ) {
-                if (!loading && dataList.size > 0) {
+                if (dataList.size > 0) {
                     items(items = dataList) {
                         PokemonSearchCard(it) {
                             nowSeenIndex = lazyState.firstVisibleItemIndex

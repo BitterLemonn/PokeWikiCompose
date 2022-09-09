@@ -17,12 +17,12 @@ data class PokemonMovesBean(
 @Serializable
 @Entity
 data class PokemonMoveBean(
-    @ColumnInfo val accuracy: Int? = 0,
+    @ColumnInfo val accuracy: Int = 0,
     @ColumnInfo val damage_type: String = "",
-    @ColumnInfo val level: Int? = null,
+    @ColumnInfo val level: Int = 0,
     @ColumnInfo val move_id: Int = 0,
     @ColumnInfo val move_name: String = "",
-    @ColumnInfo val power: Int? = 0,
+    @ColumnInfo val power: Int = 0,
     @ColumnInfo val pp: Int = 0,
     @ColumnInfo val type_name: String = ""
 )

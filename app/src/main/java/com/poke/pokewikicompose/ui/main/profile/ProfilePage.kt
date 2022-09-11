@@ -108,7 +108,7 @@ fun ProfilePage(
                 text = "我的收藏",
                 isShowArrow = true
             ) {
-                // TODO 跳转我的收藏
+                navCtrl?.navigate(COLLECTION_PAGE)
             }
             ScreenItemBtn(
                 modifier = Modifier.padding(horizontal = 20.dp),

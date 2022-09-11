@@ -19,6 +19,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.poke.pokewikicompose.ui.AppSnackBar
+import com.poke.pokewikicompose.ui.collection.CollectionPage
 import com.poke.pokewikicompose.ui.cover.CoverPage
 import com.poke.pokewikicompose.ui.detail.DetailPage
 import com.poke.pokewikicompose.ui.edit.password.PasswordEditPage
@@ -160,6 +161,14 @@ fun AppScaffold() {
                     Color(0xFFEFEFEF), darkIcons = MaterialTheme.colors.isLight
                 )
                 FeedbackPage(navCtrl = navController, scaffoldState = scaffoldState)
+            }
+            composable(
+                route = COLLECTION_PAGE
+            ) {
+                rememberSystemUiController().setNavigationBarColor(
+                    Color(0xFFEFEFEF), darkIcons = MaterialTheme.colors.isLight
+                )
+                CollectionPage(navCtrl = navController, scaffoldState = scaffoldState)
             }
         }
     }

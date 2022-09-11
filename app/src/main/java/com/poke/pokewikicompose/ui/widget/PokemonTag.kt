@@ -18,7 +18,7 @@ import kotlin.math.max
 
 @Composable
 fun PokemonTag(
-    text: String = "#001",
+    text: String = "1",
     fontSize: Int = 11,
     tagWidth: Int = 40,
     isColored: Boolean = false

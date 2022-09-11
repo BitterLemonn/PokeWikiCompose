@@ -19,11 +19,12 @@ const val SEARCH_MAIN_PAGE = "SEARCH_MAIN_PAGE"
 const val PROFILE_EDIT_PAGE = "PROFILE_EDIT_PAGE"
 const val PASSWORD_EDIT_PAGE = "PASSWORD_EDIT_PAGE"
 const val FEEDBACK_PAGE = "FEEDBACK_PAGE"
+const val COLLECTION_PAGE = "COLLECTION_PAGE"
 const val DETAIL_PAGE = "DETAIL_PAGE"
 
 // 服务器地址
-const val SERVER_URL = "http://192.168.137.1:8080/v1/"
-const val DOWNLOAD_URL = "http://192.168.137.1:8080/image/"
+const val SERVER_URL = "http://192.168.0.105:8080/v1/"
+const val DOWNLOAD_URL = "http://192.168.0.105:8080/image/"
 
 // 信号
 const val INIT = 0

@@ -22,18 +22,14 @@ const val FEEDBACK_PAGE = "FEEDBACK_PAGE"
 const val DETAIL_PAGE = "DETAIL_PAGE"
 
 // 服务器地址
-const val SERVER_URL = "http://192.168.2.12:8080/v1/"
-const val DOWNLOAD_URL = "http://192.168.128.34:8080/image/"
+const val SERVER_URL = "http://192.168.137.1:8080/v1/"
+const val DOWNLOAD_URL = "http://192.168.137.1:8080/image/"
 
 // 信号
 const val INIT = 0
 const val LOADING = 10000
 const val SUCCESS = 20001
 const val ERROR = -1
-
-//sp
-const val SHARED_KEY = "POKE_WIKI_SHARED_KEY"
-const val USER_DATA = "USER_DATA"
 
 @Composable
 fun getColorByText(text: String): Color {

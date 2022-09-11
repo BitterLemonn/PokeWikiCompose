@@ -25,6 +25,7 @@ import com.poke.pokewikicompose.ui.theme.BtnText
 import com.poke.pokewikicompose.ui.widget.ScreenItemBtn
 import com.poke.pokewikicompose.ui.widget.WarpLoadingDialog
 import com.poke.pokewikicompose.utils.COVER_PAGE
+import com.poke.pokewikicompose.utils.FEEDBACK_PAGE
 import com.poke.pokewikicompose.utils.getAppVersionName
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -46,7 +47,8 @@ fun AboutPage(
         ) {
             Column(
                 verticalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.weight(0.3f)
+                modifier = Modifier
+                    .weight(0.3f)
                     .padding(top = 10.dp)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -109,7 +111,7 @@ fun AboutPage(
                     text = "联系我们",
                     modifier = Modifier.padding(horizontal = 18.dp)
                 ) {
-                    // TODO 添加反馈界面
+                    navCtrl.navigate(FEEDBACK_PAGE)
                 }
             }
         }

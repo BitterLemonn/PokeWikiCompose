@@ -34,6 +34,8 @@ import com.poke.pokewikicompose.ui.widget.PokeBallSearchBar
 import com.poke.pokewikicompose.ui.widget.PokemonSearchCard
 import com.poke.pokewikicompose.ui.widget.WarpLoadingDialog
 import com.poke.pokewikicompose.utils.DETAIL_PAGE
+import com.poke.pokewikicompose.utils.SEARCH_MAIN_PAGE
+import com.poke.pokewikicompose.utils.SEARCH_PAGE
 import com.zj.mvi.core.observeEvent
 import com.zj.mvi.core.observeState
 import kotlinx.coroutines.launch
@@ -159,8 +161,7 @@ fun SearchMainPage(
                     value = "",
                     onValueChange = {},
                     onClick = {
-                        // TODO 跳转搜索页
-                        Logger.d("SearchMainPage: 点击了搜索")
+                        navCtrl.navigate(SEARCH_PAGE)
                     }
                 )
             }

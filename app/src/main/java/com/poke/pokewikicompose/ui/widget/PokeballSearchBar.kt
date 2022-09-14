@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,8 +23,7 @@ fun PokeBallSearchBar(
     value: String = "",
     onValueChange: (String) -> Unit,
     onClick: (() -> Unit)? = null,
-    onSearch: (() -> Unit)? = null,
-    onDone: () -> Unit = {}
+    onSearch: (() -> Unit)? = null
 ) {
     Surface(
         shape = RoundedCornerShape(100.dp),
@@ -53,7 +53,10 @@ fun PokeBallSearchBar(
                 value = value,
                 onValueChange = onValueChange,
                 textStyle = LocalTextStyle.current.copy(fontSize = 14.sp),
-                enabled = onClick == null
+                enabled = onClick == null,
+                keyboardActions = KeyboardActions(
+                    onDone = { onSearch?.invoke() }
+                )
             )
             Button(
                 modifier = Modifier.size(50.dp),

@@ -21,16 +21,53 @@ const val PASSWORD_EDIT_PAGE = "PASSWORD_EDIT_PAGE"
 const val FEEDBACK_PAGE = "FEEDBACK_PAGE"
 const val COLLECTION_PAGE = "COLLECTION_PAGE"
 const val DETAIL_PAGE = "DETAIL_PAGE"
+const val SEARCH_PAGE = "SEARCH_PAGE"
 
 // 服务器地址
-const val SERVER_URL = "http://192.168.0.105:8080/v1/"
-const val DOWNLOAD_URL = "http://192.168.0.105:8080/image/"
+const val SERVER_URL = "http://192.168.2.12:8080/v1/"
+const val DOWNLOAD_URL = "http://192.168.2.12:8080/image/"
 
 // 信号
 const val INIT = 0
 const val LOADING = 10000
 const val SUCCESS = 20001
 const val ERROR = -1
+
+enum class PokemonSearchMode {
+    NAME, TYPE, GEN
+}
+
+val PokemonTypeList = listOf(
+    "一般",
+    "飞行",
+    "火",
+    "超能力",
+    "水",
+    "虫",
+    "电",
+    "岩石",
+    "草",
+    "幽灵",
+    "冰",
+    "龙",
+    "格斗",
+    "恶",
+    "毒",
+    "钢",
+    "地面",
+    "妖精"
+)
+
+val PokemonGenList = listOf(
+    "第一世代",
+    "第二世代",
+    "第三世代",
+    "第四世代",
+    "第五世代",
+    "第六世代",
+    "第七世代",
+    "第八世代",
+)
 
 @Composable
 fun getColorByText(text: String): Color {
@@ -94,6 +131,8 @@ object AppContext {
         userId = 0,
         isAutoCache = false
     )
+
+    val searchHistory = ArrayList<String>()
 
     fun logout() {
         userData = UserBean(

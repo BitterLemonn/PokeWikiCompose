@@ -31,6 +31,7 @@ import com.poke.pokewikicompose.ui.main.about.AboutPage
 import com.poke.pokewikicompose.ui.main.profile.ProfilePage
 import com.poke.pokewikicompose.ui.main.searchMain.SearchMainPage
 import com.poke.pokewikicompose.ui.register.RegisterPage
+import com.poke.pokewikicompose.ui.search.SearchPage
 import com.poke.pokewikicompose.utils.*
 
 @Composable
@@ -169,6 +170,14 @@ fun AppScaffold() {
                     Color(0xFFEFEFEF), darkIcons = MaterialTheme.colors.isLight
                 )
                 CollectionPage(navCtrl = navController, scaffoldState = scaffoldState)
+            }
+            composable(
+                route = SEARCH_PAGE
+            ) {
+                rememberSystemUiController().setNavigationBarColor(
+                    Color(0xFFEFEFEF), darkIcons = MaterialTheme.colors.isLight
+                )
+                SearchPage(navCtrl = navController, scaffoldState = scaffoldState)
             }
         }
     }

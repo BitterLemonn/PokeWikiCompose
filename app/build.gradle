@@ -86,4 +86,6 @@ dependencies {
     implementation("com.github.leavesCZY:Matisse:0.0.5") {
         exclude group: 'androidx.activity'
     }
+    // ComposeFlowLayout
+    implementation 'com.github.ltttttttttttt:ComposeViews:1.0.9'
 }

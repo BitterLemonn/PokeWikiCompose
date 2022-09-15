@@ -1,6 +1,9 @@
 package com.poke.pokewikicompose.ui.widget
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -24,12 +27,19 @@ import com.poke.pokewikicompose.dataBase.data.bean.PokemonSearchBean
 
 @Composable
 fun PokemonSearchDetailCard(
-    item: PokemonSearchBean
+    item: PokemonSearchBean,
+    onClick: () -> Unit
 ) {
     Card(
         elevation = 5.dp,
         modifier = Modifier
-            .width(140.dp),
+            .padding(10.dp)
+            .clickable(
+                interactionSource = MutableInteractionSource(),
+                indication = LocalIndication.current
+            ) {
+              onClick.invoke()
+            },
         shape = RoundedCornerShape(10.dp),
         backgroundColor = Color(0xFFD4E5F8)
     ) {
@@ -55,6 +65,7 @@ fun PokemonSearchDetailCard(
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
             )
+            Spacer(modifier = Modifier.height(5.dp))
             LazyRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
@@ -85,5 +96,5 @@ fun PokemonSearchDetailCardPreview() {
             pokemon_name = "妙蛙花",
             img_path = ""
         )
-    )
+    ) {}
 }

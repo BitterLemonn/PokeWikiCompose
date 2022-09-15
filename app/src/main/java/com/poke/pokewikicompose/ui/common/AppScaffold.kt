@@ -32,6 +32,7 @@ import com.poke.pokewikicompose.ui.main.profile.ProfilePage
 import com.poke.pokewikicompose.ui.main.searchMain.SearchMainPage
 import com.poke.pokewikicompose.ui.register.RegisterPage
 import com.poke.pokewikicompose.ui.search.SearchPage
+import com.poke.pokewikicompose.ui.search.searchDetail.SearchDetailPage
 import com.poke.pokewikicompose.utils.*
 
 @Composable
@@ -178,6 +179,31 @@ fun AppScaffold() {
                     Color(0xFFEFEFEF), darkIcons = MaterialTheme.colors.isLight
                 )
                 SearchPage(navCtrl = navController, scaffoldState = scaffoldState)
+            }
+            composable(
+                route = "$SEARCH_DETAIL_PAGE/{key}/{mode}",
+                arguments = listOf(
+                    navArgument("key") {
+                        defaultValue = ""
+                        type = NavType.StringType
+                    },
+                    navArgument("mode") {
+                        type = NavType.inferFromValueType(PokemonSearchMode.NAME)
+                    }
+                )
+            ) {
+                val argument = requireNotNull(it.arguments)
+                val key = argument.getString("key")
+                val mode = argument.get("mode") as PokemonSearchMode
+                rememberSystemUiController().setNavigationBarColor(
+                    Color(0xFFEFEFEF), darkIcons = MaterialTheme.colors.isLight
+                )
+                SearchDetailPage(
+                    navCtrl = navController,
+                    scaffoldState = scaffoldState,
+                    key = key!!,
+                    mode = mode
+                )
             }
         }
     }

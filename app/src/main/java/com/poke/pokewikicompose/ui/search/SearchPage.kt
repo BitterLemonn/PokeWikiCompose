@@ -23,27 +23,21 @@ import com.poke.pokewikicompose.R
 import com.poke.pokewikicompose.ui.theme.PokeBallRed
 import com.poke.pokewikicompose.ui.widget.PokeBallSearchBar
 import com.poke.pokewikicompose.ui.widget.PokemonTag
-import com.poke.pokewikicompose.utils.AppContext
-import com.poke.pokewikicompose.utils.PokemonGenList
-import com.poke.pokewikicompose.utils.PokemonSearchMode
-import com.poke.pokewikicompose.utils.PokemonTypeList
+import com.poke.pokewikicompose.utils.*
 
 @Composable
 fun SearchPage(
     navCtrl: NavController,
     scaffoldState: ScaffoldState,
 ) {
-    val searchHistory = remember { mutableStateListOf<String>() }
     var searchKey by remember { mutableStateOf("") }
     var searchMode by remember { mutableStateOf(PokemonSearchMode.NAME) }
+    var isClearHistory by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        searchHistory.addAll(AppContext.searchHistory)
+    LaunchedEffect(isClearHistory){
+        isClearHistory = false
     }
-    LaunchedEffect(searchHistory) {
-        AppContext.searchHistory.clear()
-        AppContext.searchHistory.addAll(searchHistory)
-    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         scaffoldState = scaffoldState,
@@ -78,7 +72,10 @@ fun SearchPage(
                         onSearch = {
                             if (searchKey.isNotEmpty()) {
                                 searchMode = PokemonSearchMode.NAME
-                                searchHistory.add(searchKey)
+                                if (searchKey in AppContext.searchHistory)
+                                    AppContext.searchHistory.remove(searchKey)
+                                AppContext.searchHistory.add(0, searchKey)
+                                navCtrl.navigate("$SEARCH_DETAIL_PAGE/$searchKey/$searchMode")
                             }
                         }
                     )
@@ -92,7 +89,7 @@ fun SearchPage(
                     .fillMaxSize()
                     .padding(vertical = 10.dp, horizontal = 20.dp)
             ) {
-                if (searchHistory.size > 0) {
+                if (AppContext.searchHistory.size > 0 && !isClearHistory) {
                     // 搜索记录
                     Column(
                         modifier = Modifier.fillMaxWidth(),
@@ -119,7 +116,8 @@ fun SearchPage(
                                         .size(20.dp)
                                         .clip(CircleShape)
                                         .clickable {
-                                            searchHistory.clear()
+                                            AppContext.searchHistory.clear()
+                                            isClearHistory = true
                                         }
                                 )
                             }
@@ -130,7 +128,7 @@ fun SearchPage(
                             horizontalMargin = 10.dp,
                             verticalMargin = 10.dp
                         ) {
-                            for (item in searchHistory) {
+                            for (item in AppContext.searchHistory) {
                                 PokemonTag(
                                     text = item,
                                     isColored = true,
@@ -172,6 +170,10 @@ fun SearchPage(
                             ) {
                                 searchKey = item
                                 searchMode = PokemonSearchMode.TYPE
+                                navCtrl.navigate("$SEARCH_DETAIL_PAGE/$searchKey/$searchMode")
+                                if (item in AppContext.searchHistory)
+                                    AppContext.searchHistory.remove(item)
+                                AppContext.searchHistory.add(0, item)
                             }
                         }
                     }
@@ -203,6 +205,10 @@ fun SearchPage(
                             ) {
                                 searchKey = item
                                 searchMode = PokemonSearchMode.GEN
+                                navCtrl.navigate("$SEARCH_DETAIL_PAGE/$searchKey/$searchMode")
+                                if (item in AppContext.searchHistory)
+                                    AppContext.searchHistory.remove(item)
+                                AppContext.searchHistory.add(0, item)
                             }
                         }
                     }

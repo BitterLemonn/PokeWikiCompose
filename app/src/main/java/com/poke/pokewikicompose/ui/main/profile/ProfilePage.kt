@@ -137,13 +137,10 @@ fun ProfilePage(
                     AppContext.localSetting = AppContext.localSetting.copy(
                         isAutoCache = it
                     )
-                    coroutineScope.launch {
-                        flow {
-                            GlobalDataBase.database.localSettingDao().updateLocalSetting(
-                                AppContext.localSetting
-                            )
-                            emit("")
-                        }.flowOn(Dispatchers.IO).collect()
+                    coroutineScope.launch(Dispatchers.IO) {
+                        GlobalDataBase.database.localSettingDao().updateLocalSetting(
+                            AppContext.localSetting
+                        )
                     }
                 }
             )

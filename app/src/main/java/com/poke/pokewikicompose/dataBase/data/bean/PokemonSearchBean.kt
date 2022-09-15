@@ -18,5 +18,5 @@ data class PokemonSearchBean(
     @ColumnInfo val img_path: String? = null,
     @ColumnInfo val img_url: String,
     @ColumnInfo val pokemon_name: String,
-    @ColumnInfo val pokemon_type: ArrayList<String>
+    @ColumnInfo val pokemon_type: List<String>
 ) : Parcelable

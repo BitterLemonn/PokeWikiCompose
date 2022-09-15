@@ -1,11 +1,14 @@
 package com.poke.pokewikicompose.utils
 
+import android.content.Context
+import android.os.Environment
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.poke.pokewikicompose.R
 import com.poke.pokewikicompose.dataBase.data.bean.LocalSetting
 import com.poke.pokewikicompose.dataBase.data.bean.UserBean
+import com.poke.pokewikicompose.dataBase.data.repository.DownloadType
 import com.poke.pokewikicompose.ui.theme.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -103,6 +106,10 @@ fun getColorByText(text: String): Color {
 
         else -> PokeBallRed
     }
+}
+
+fun getFilePath(type: DownloadType, pokeID: Int, context: Context): String {
+    return "${context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)?.path}/${if (type == DownloadType.SMALL) "small" else "big"}/$pokeID.png"
 }
 
 object JsonConverter {

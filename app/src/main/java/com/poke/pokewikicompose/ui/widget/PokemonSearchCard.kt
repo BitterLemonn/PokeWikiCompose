@@ -63,7 +63,7 @@ fun PokemonSearchCard(
                 ) {
                     SubcomposeAsyncImage(
                         modifier = Modifier.size(50.dp),
-                        model = item.img_url,
+                        model = item.img_path ?: item.img_url,
                         contentDescription = "pokemon image"
                     ) {
                         val state = painter.state
@@ -91,7 +91,7 @@ fun PokemonSearchCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.End
                 ) {
-                    items(item.pokemon_type){
+                    items(item.pokemon_type) {
                         Spacer(modifier = Modifier.width(10.dp))
                         PokemonTag(text = it, isColored = true)
                     }

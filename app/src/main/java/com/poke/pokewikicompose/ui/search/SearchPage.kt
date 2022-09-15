@@ -20,21 +20,39 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.lt.compose_views.flow_layout.FlowLayout
 import com.poke.pokewikicompose.R
+import com.poke.pokewikicompose.dataBase.GlobalDataBase
 import com.poke.pokewikicompose.ui.theme.PokeBallRed
 import com.poke.pokewikicompose.ui.widget.PokeBallSearchBar
 import com.poke.pokewikicompose.ui.widget.PokemonTag
 import com.poke.pokewikicompose.utils.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun SearchPage(
     navCtrl: NavController,
     scaffoldState: ScaffoldState,
 ) {
+    val localInfo = GlobalDataBase.database.localSettingDao()
+    val localSetting = AppContext.localSetting
+
+    val coroutine = rememberCoroutineScope()
+
     var searchKey by remember { mutableStateOf("") }
     var searchMode by remember { mutableStateOf(PokemonSearchMode.NAME) }
     var isClearHistory by remember { mutableStateOf(false) }
 
-    LaunchedEffect(isClearHistory){
+    val searchHistory = remember { mutableStateListOf<String>() }
+
+    LaunchedEffect(Unit) {
+        coroutine.launch(Dispatchers.IO) {
+            val localHistory = localInfo.getLocalSettingWithUserID(AppContext.userData.userId)!!
+                .searchHistory
+            searchHistory.addAll(localHistory)
+        }
+    }
+
+    LaunchedEffect(isClearHistory) {
         isClearHistory = false
     }
 
@@ -72,9 +90,14 @@ fun SearchPage(
                         onSearch = {
                             if (searchKey.isNotEmpty()) {
                                 searchMode = PokemonSearchMode.NAME
-                                if (searchKey in AppContext.searchHistory)
-                                    AppContext.searchHistory.remove(searchKey)
-                                AppContext.searchHistory.add(0, searchKey)
+                                if (searchKey in searchHistory)
+                                    searchHistory.remove(searchKey)
+                                searchHistory.add(0, searchKey)
+                                coroutine.launch(Dispatchers.IO) {
+                                    localInfo.updateLocalSetting(
+                                        setting = localSetting.copy(searchHistory = searchHistory.toList())
+                                    )
+                                }
                                 navCtrl.navigate("$SEARCH_DETAIL_PAGE/$searchKey/$searchMode")
                             }
                         }
@@ -89,7 +112,7 @@ fun SearchPage(
                     .fillMaxSize()
                     .padding(vertical = 10.dp, horizontal = 20.dp)
             ) {
-                if (AppContext.searchHistory.size > 0 && !isClearHistory) {
+                if (searchHistory.size > 0 && !isClearHistory) {
                     // 搜索记录
                     Column(
                         modifier = Modifier.fillMaxWidth(),
@@ -116,7 +139,12 @@ fun SearchPage(
                                         .size(20.dp)
                                         .clip(CircleShape)
                                         .clickable {
-                                            AppContext.searchHistory.clear()
+                                            searchHistory.clear()
+                                            coroutine.launch(Dispatchers.IO) {
+                                                localInfo.updateLocalSetting(
+                                                    setting = localSetting.copy(searchHistory = searchHistory.toList())
+                                                )
+                                            }
                                             isClearHistory = true
                                         }
                                 )
@@ -128,7 +156,7 @@ fun SearchPage(
                             horizontalMargin = 10.dp,
                             verticalMargin = 10.dp
                         ) {
-                            for (item in AppContext.searchHistory) {
+                            for (item in searchHistory) {
                                 PokemonTag(
                                     text = item,
                                     isColored = true,
@@ -137,6 +165,15 @@ fun SearchPage(
                                 ) {
                                     searchKey = item
                                     searchMode = PokemonSearchMode.NAME
+                                    if (searchKey in searchHistory)
+                                        searchHistory.remove(searchKey)
+                                    searchHistory.add(0, searchKey)
+                                    coroutine.launch(Dispatchers.IO) {
+                                        localInfo.updateLocalSetting(
+                                            setting = localSetting.copy(searchHistory = searchHistory.toList())
+                                        )
+                                    }
+                                    navCtrl.navigate("$SEARCH_DETAIL_PAGE/$searchKey/$searchMode")
                                 }
                             }
                         }
@@ -171,9 +208,14 @@ fun SearchPage(
                                 searchKey = item
                                 searchMode = PokemonSearchMode.TYPE
                                 navCtrl.navigate("$SEARCH_DETAIL_PAGE/$searchKey/$searchMode")
-                                if (item in AppContext.searchHistory)
-                                    AppContext.searchHistory.remove(item)
-                                AppContext.searchHistory.add(0, item)
+                                if (item in searchHistory)
+                                    searchHistory.remove(item)
+                                searchHistory.add(0, item)
+                                coroutine.launch(Dispatchers.IO) {
+                                    localInfo.updateLocalSetting(
+                                        setting = localSetting.copy(searchHistory = searchHistory.toList())
+                                    )
+                                }
                             }
                         }
                     }
@@ -206,9 +248,14 @@ fun SearchPage(
                                 searchKey = item
                                 searchMode = PokemonSearchMode.GEN
                                 navCtrl.navigate("$SEARCH_DETAIL_PAGE/$searchKey/$searchMode")
-                                if (item in AppContext.searchHistory)
-                                    AppContext.searchHistory.remove(item)
-                                AppContext.searchHistory.add(0, item)
+                                if (item in searchHistory)
+                                    searchHistory.remove(item)
+                                searchHistory.add(0, item)
+                                coroutine.launch(Dispatchers.IO) {
+                                    localInfo.updateLocalSetting(
+                                        setting = localSetting.copy(searchHistory = searchHistory.toList())
+                                    )
+                                }
                             }
                         }
                     }

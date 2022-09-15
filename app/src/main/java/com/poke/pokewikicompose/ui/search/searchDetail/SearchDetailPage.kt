@@ -24,6 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.poke.pokewikicompose.R
+import com.poke.pokewikicompose.dataBase.GlobalDataBase
 import com.poke.pokewikicompose.dataBase.data.bean.PokemonSearchBean
 import com.poke.pokewikicompose.ui.SNACK_ERROR
 import com.poke.pokewikicompose.ui.popupSnackBar
@@ -36,6 +37,8 @@ import com.poke.pokewikicompose.utils.DETAIL_PAGE
 import com.poke.pokewikicompose.utils.PokemonSearchMode
 import com.zj.mvi.core.observeEvent
 import com.zj.mvi.core.observeState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun SearchDetailPage(
@@ -49,6 +52,9 @@ fun SearchDetailPage(
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutine = rememberCoroutineScope()
 
+    val localInfo = GlobalDataBase.database.localSettingDao()
+    val localSetting = AppContext.localSetting
+
     var isShowLoading by remember { mutableStateOf(false) }
     val searchHistory = remember { mutableStateListOf<String>() }
     var searchKey by remember { mutableStateOf(key) }
@@ -56,7 +62,11 @@ fun SearchDetailPage(
     val searchResult = remember { mutableStateListOf<PokemonSearchBean>() }
 
     LaunchedEffect(Unit) {
-        searchHistory.addAll(AppContext.searchHistory)
+        coroutine.launch(Dispatchers.IO) {
+            val localHistory = localInfo.getLocalSettingWithUserID(AppContext.userData.userId)!!
+                .searchHistory
+            searchHistory.addAll(localHistory)
+        }
         viewStates.observeState(lifecycleOwner, SearchDetailViewStates::searchResult) {
             searchResult.clear()
             searchResult.addAll(it)
@@ -81,10 +91,6 @@ fun SearchDetailPage(
     }
     LaunchedEffect(searchMode) {
         viewModel.dispatch(SearchDetailViewAction.UpdateSearchMode(searchMode))
-    }
-    LaunchedEffect(searchHistory) {
-        AppContext.searchHistory.clear()
-        AppContext.searchHistory.addAll(searchHistory)
     }
 
     Scaffold(
@@ -121,7 +127,14 @@ fun SearchDetailPage(
                         onSearch = {
                             if (searchKey.isNotEmpty()) {
                                 searchMode = PokemonSearchMode.NAME
-                                searchHistory.add(searchKey)
+                                if (searchKey in searchHistory)
+                                    searchHistory.remove(searchKey)
+                                searchHistory.add(0, searchKey)
+                                coroutine.launch(Dispatchers.IO) {
+                                    localInfo.updateLocalSetting(
+                                        setting = localSetting.copy(searchHistory = searchHistory.toList())
+                                    )
+                                }
                             }
                         }
                     )

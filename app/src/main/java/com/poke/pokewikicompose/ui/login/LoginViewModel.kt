@@ -76,7 +76,8 @@ class LoginViewModel : ViewModel() {
                         GlobalDataBase.database.localSettingDao().insertLocalSetting(
                             LocalSetting(
                                 userId = it.userId,
-                                isAutoCache = false
+                                isAutoCache = false,
+                                searchHistory = ArrayList()
                             )
                         )
                 } ?: result.msg?.let { _viewEvent.setEvent(LoginViewEvent.ShowToast(it)) }

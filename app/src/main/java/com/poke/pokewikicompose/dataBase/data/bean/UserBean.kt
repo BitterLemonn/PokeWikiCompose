@@ -2,8 +2,9 @@ package com.poke.pokewikicompose.dataBase.data.bean
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.Ignore
 import androidx.room.PrimaryKey
+import androidx.room.TypeConverters
+import com.poke.pokewikicompose.dataBase.data.StringArrayConverter
 import kotlinx.serialization.Serializable
 
 /**
@@ -24,8 +25,10 @@ data class UserBean(
     @ColumnInfo val username: String
 )
 
+@TypeConverters(StringArrayConverter::class)
 @Entity
 data class LocalSetting(
     @PrimaryKey val userId: Int,
-    @ColumnInfo val isAutoCache: Boolean
+    @ColumnInfo val isAutoCache: Boolean,
+    @ColumnInfo val searchHistory: List<String>
 )

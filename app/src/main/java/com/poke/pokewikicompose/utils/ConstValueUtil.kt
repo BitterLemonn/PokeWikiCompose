@@ -130,10 +130,9 @@ object AppContext {
 
     var localSetting = LocalSetting(
         userId = 0,
-        isAutoCache = false
+        isAutoCache = false,
+        searchHistory = ArrayList()
     )
-
-    val searchHistory = ArrayList<String>()
 
     fun logout() {
         userData = UserBean(

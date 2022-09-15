@@ -66,7 +66,8 @@ class RegisterViewModel : ViewModel() {
                     GlobalDataBase.database.localSettingDao().insertLocalSetting(
                         LocalSetting(
                             userId = it.userId,
-                            isAutoCache = false
+                            isAutoCache = false,
+                            searchHistory = ArrayList()
                         )
                     )
                 } ?: result.msg?.let { _viewEvents.setEvent(RegisterViewEvent.ShowToast(it)) }

@@ -27,14 +27,22 @@ import coil.compose.AsyncImage
 import com.poke.pokewikicompose.R
 import com.poke.pokewikicompose.dataBase.data.bean.PokemonSearchBean
 import com.poke.pokewikicompose.ui.theme.PokeBallRed
+import com.poke.pokewikicompose.utils.AppCache
 import kotlinx.coroutines.launch
+import java.io.File
 import kotlin.math.roundToInt
 
 private val swipeDistance = 70.dp
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun PokemonCollectionCard(item: PokemonSearchBean, onDelItem: () -> Unit, onClickCard: () -> Unit) {
+fun PokemonCollectionCard(
+    item: PokemonSearchBean,
+    onDelItem: () -> Unit,
+    onClickCard: () -> Unit
+) {
+    val imageCache = AppCache.getPathItem(item.pokemon_id.toInt())
+
     val swipeDistance = with(LocalDensity.current) { swipeDistance.toPx() }
     val swipeState = rememberSwipeableState(false)
 
@@ -64,7 +72,9 @@ fun PokemonCollectionCard(item: PokemonSearchBean, onDelItem: () -> Unit, onClic
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AsyncImage(
-                    model = item.img_url,
+                    model = imageCache?.let {
+                        it.smallPath?.let { path -> File(path) } ?: item.img_url
+                    } ?: item.img_url,
                     contentDescription = "",
                     modifier = Modifier
                         .padding(horizontal = 10.dp, vertical = 5.dp)

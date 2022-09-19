@@ -24,12 +24,16 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.poke.pokewikicompose.R
 import com.poke.pokewikicompose.dataBase.data.bean.PokemonSearchBean
+import com.poke.pokewikicompose.utils.AppCache
+import java.io.File
 
 @Composable
 fun PokemonSearchDetailCard(
     item: PokemonSearchBean,
     onClick: () -> Unit
 ) {
+    val imageCache = AppCache.getPathItem(item.pokemon_id.toInt())
+
     Card(
         elevation = 5.dp,
         modifier = Modifier
@@ -38,7 +42,7 @@ fun PokemonSearchDetailCard(
                 interactionSource = MutableInteractionSource(),
                 indication = LocalIndication.current
             ) {
-              onClick.invoke()
+                onClick.invoke()
             },
         shape = RoundedCornerShape(10.dp),
         backgroundColor = Color(0xFFD4E5F8)
@@ -52,7 +56,9 @@ fun PokemonSearchDetailCard(
                         .clip(CircleShape)
                 )
                 AsyncImage(
-                    model = item.img_url,
+                    model = imageCache?.let {
+                        it.smallPath?.let { path -> File(path) } ?: item.img_url
+                    } ?: item.img_url,
                     contentDescription = item.pokemon_name,
                     modifier = Modifier.fillMaxSize()
                 )

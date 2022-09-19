@@ -12,16 +12,13 @@ import com.poke.pokewikicompose.dataBase.data.repository.SearchMainRepository
 import com.poke.pokewikicompose.utils.AppContext
 import com.poke.pokewikicompose.utils.INIT
 import com.poke.pokewikicompose.utils.NetworkState
-import com.poke.pokewikicompose.utils.getFilePath
+import com.poke.pokewikicompose.utils.downloadWithType
 import com.zj.mvi.core.SharedFlowEvents
 import com.zj.mvi.core.setEvent
 import com.zj.mvi.core.setState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import okio.buffer
-import okio.sink
-import java.io.File
 
 class SearchMainViewModel : ViewModel() {
     private val repository = SearchMainRepository.getInstance()
@@ -36,7 +33,6 @@ class SearchMainViewModel : ViewModel() {
             is SearchMainViewAction.GetData -> getData()
             is SearchMainViewAction.ResetLoadingState -> _viewStates.value =
                 _viewStates.value.copy(loadingState = INIT)
-
         }
     }
 
@@ -44,7 +40,8 @@ class SearchMainViewModel : ViewModel() {
         viewModelScope.launch {
             flow {
                 val page = _viewStates.value.page
-                val list = GlobalDataBase.database.PokeSearchCacheDao().getWithPage((page - 1) * 10)
+                val list = GlobalDataBase.database.pokeSearchCacheDao().getWithPage((page - 1) * 10)
+                Logger.d("cached search: $list")
                 list?.let {
                     if (list.isNotEmpty()) {
                         Logger.d("get cache list: $list")
@@ -75,28 +72,17 @@ class SearchMainViewModel : ViewModel() {
                     // 自动缓存
                     if (AppContext.localSetting.isAutoCache) {
                         it.forEach { item ->
-                            downloadSmall(item.pokemon_id, item)
+                            downloadWithType(
+                                pokeID = item.pokemon_id,
+                                type = DownloadType.SMALL,
+                                context = context
+                            )
+                            GlobalDataBase.database.pokeSearchCacheDao().insert(item)
                         }
                     }
                 } ?: result.msg?.let { _viewEvents.setEvent(SearchMainViewEvent.ShowToast(it)) }
             }
             is NetworkState.Error -> throw Exception(result.msg)
-        }
-    }
-
-    private suspend fun downloadSmall(pokeID: String, pokeSearch: PokemonSearchBean) {
-        val result = download.getImageWithTypeAndID(DownloadType.SMALL, pokeID.toInt())
-        if (result is NetworkState.Success) {
-            val path = getFilePath(DownloadType.SMALL, pokeID.toInt(), context)
-            Logger.d("path: $path")
-            val dest = File(path)
-            dest.createNewFile()
-            val sink = dest.sink()
-            val bufferedSink = sink.buffer()
-            bufferedSink.writeAll(result.data!!.source())
-            bufferedSink.close()
-
-            GlobalDataBase.database.PokeSearchCacheDao().insert(pokeSearch.copy(img_path = path))
         }
     }
 }

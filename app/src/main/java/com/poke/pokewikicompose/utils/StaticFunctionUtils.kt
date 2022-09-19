@@ -3,7 +3,13 @@ package com.poke.pokewikicompose.utils
 import android.content.Context
 import androidx.compose.ui.graphics.Color
 import com.orhanobut.logger.Logger
+import com.poke.pokewikicompose.dataBase.data.bean.PokemonImageCacheBean
+import com.poke.pokewikicompose.dataBase.data.repository.DownloadRepository
+import com.poke.pokewikicompose.dataBase.data.repository.DownloadType
 import com.poke.pokewikicompose.ui.theme.*
+import okio.buffer
+import okio.sink
+import java.io.File
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 
@@ -67,5 +73,42 @@ fun getPokemonColor(pokemonColor: String): Color {
             Logger.e("wrong pokemon color: $pokemonColor")
             Color.Transparent
         }
+    }
+}
+
+suspend fun downloadWithType(
+    pokeID: String,
+    type: DownloadType,
+    context: Context
+): String {
+    when (val result =
+        DownloadRepository.getInstance().getImageWithTypeAndID(type, pokeID.toInt())) {
+        is NetworkState.Success -> {
+            val path = getFilePath(type, pokeID.toInt(), context)
+            val dest = File(path)
+            val sink = dest.sink()
+            val bufferedSink = sink.buffer()
+            bufferedSink.writeAll(result.data!!.source())
+            bufferedSink.close()
+
+            var item = AppCache.getPathItem(pokeID.toInt())
+            when (type) {
+                DownloadType.SMALL -> {
+                    item = item?.copy(pokemonID = pokeID.toInt(), smallPath = path)
+                        ?: PokemonImageCacheBean(pokemonID = pokeID.toInt(), smallPath = path)
+                    AppCache.updatePathItem(item)
+                }
+                DownloadType.BIG -> {
+                    item = item?.copy(pokemonID = pokeID.toInt(), bigPath = path)
+                        ?: PokemonImageCacheBean(pokemonID = pokeID.toInt(), bigPath = path)
+                    AppCache.updatePathItem(item)
+                }
+            }
+
+
+            return if (dest.length() > 0L) path
+            else ""
+        }
+        is NetworkState.Error -> throw Exception(result.msg)
     }
 }

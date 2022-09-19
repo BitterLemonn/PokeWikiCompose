@@ -4,16 +4,17 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.poke.pokewikicompose.dataBase.dao.LocalSettingDao
-import com.poke.pokewikicompose.dataBase.dao.PokeSearchCacheDao
-import com.poke.pokewikicompose.dataBase.dao.UserDao
-import com.poke.pokewikicompose.dataBase.data.bean.LocalSetting
-import com.poke.pokewikicompose.dataBase.data.bean.PokemonDetailBean
-import com.poke.pokewikicompose.dataBase.data.bean.PokemonSearchBean
-import com.poke.pokewikicompose.dataBase.data.bean.UserBean
+import com.poke.pokewikicompose.dataBase.dao.*
+import com.poke.pokewikicompose.dataBase.data.bean.*
 
 @Database(
-    entities = [UserBean::class, PokemonSearchBean::class, PokemonDetailBean::class, LocalSetting::class],
+    entities = [
+        UserBean::class,
+        PokemonSearchBean::class,
+        PokemonDetailBean::class,
+        LocalSetting::class,
+        PokemonImageCacheBean::class
+    ],
     version = 1,
     exportSchema = false
 )
@@ -36,5 +37,9 @@ abstract class AppDataBase : RoomDatabase() {
 
     abstract fun localSettingDao(): LocalSettingDao
 
-    abstract fun PokeSearchCacheDao(): PokeSearchCacheDao
+    abstract fun pokeSearchCacheDao(): PokeSearchCacheDao
+
+    abstract fun pokeDetailCacheDao(): PokeDetailCacheDao
+
+    abstract fun pokeImageCacheDao(): PokeImageCacheDao
 }

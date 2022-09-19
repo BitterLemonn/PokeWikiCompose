@@ -2,10 +2,14 @@ package com.poke.pokewikicompose.ui.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.poke.pokewikicompose.dataBase.GlobalDataBase.Companion.context
 import com.poke.pokewikicompose.dataBase.data.bean.PokemonDetailBean
 import com.poke.pokewikicompose.dataBase.data.repository.DetailRepository
+import com.poke.pokewikicompose.dataBase.data.repository.DownloadType
+import com.poke.pokewikicompose.utils.AppCache
 import com.poke.pokewikicompose.utils.AppContext
 import com.poke.pokewikicompose.utils.NetworkState
+import com.poke.pokewikicompose.utils.downloadWithType
 import com.zj.mvi.core.SharedFlowEvents
 import com.zj.mvi.core.setEvent
 import kotlinx.coroutines.Dispatchers
@@ -79,6 +83,22 @@ class DetailPageViewModel : ViewModel() {
             is NetworkState.Success -> {
                 result.data?.let {
                     _viewEvents.setEvent(DetailPageViewEvents.TransDetail(it))
+
+                    if (AppContext.localSetting.isAutoCache) {
+                        downloadWithType(
+                            pokeID = it.pokemon_id,
+                            type = DownloadType.BIG,
+                            context = context
+                        )
+                        for (evoItem in it.poke_intro.poke_evolution)
+                            if (AppCache.pokemonPathCache.none { item -> evoItem.id == item.pokemonID })
+                                downloadWithType(
+                                    pokeID = evoItem.id.toString(),
+                                    type = DownloadType.SMALL,
+                                    context = context
+                                )
+                        AppCache.insertDetailItem(it)
+                    }
                 }
             }
             is NetworkState.Error -> throw Exception(result.msg)

@@ -33,6 +33,7 @@ import com.poke.pokewikicompose.ui.widget.LazyLoadMoreColumn
 import com.poke.pokewikicompose.ui.widget.PokeBallSearchBar
 import com.poke.pokewikicompose.ui.widget.PokemonSearchCard
 import com.poke.pokewikicompose.ui.widget.WarpLoadingDialog
+import com.poke.pokewikicompose.utils.AppContext
 import com.poke.pokewikicompose.utils.DETAIL_PAGE
 import com.poke.pokewikicompose.utils.SEARCH_MAIN_PAGE
 import com.poke.pokewikicompose.utils.SEARCH_PAGE

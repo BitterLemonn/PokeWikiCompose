@@ -2,16 +2,22 @@ package com.poke.pokewikicompose.utils
 
 import android.content.Context
 import android.os.Environment
+import android.support.annotation.WorkerThread
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import com.orhanobut.logger.Logger
 import com.poke.pokewikicompose.R
+import com.poke.pokewikicompose.dataBase.GlobalDataBase
 import com.poke.pokewikicompose.dataBase.data.bean.LocalSetting
+import com.poke.pokewikicompose.dataBase.data.bean.PokemonDetailBean
+import com.poke.pokewikicompose.dataBase.data.bean.PokemonImageCacheBean
 import com.poke.pokewikicompose.dataBase.data.bean.UserBean
 import com.poke.pokewikicompose.dataBase.data.repository.DownloadType
 import com.poke.pokewikicompose.ui.theme.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
+import java.io.File
 
 // 导航
 const val COVER_PAGE = "COVER_PAGE"
@@ -109,7 +115,18 @@ fun getColorByText(text: String): Color {
 }
 
 fun getFilePath(type: DownloadType, pokeID: Int, context: Context): String {
-    return "${context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)?.path}/${if (type == DownloadType.SMALL) "small" else "big"}/$pokeID.png"
+    val root =
+        "${context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)}/${
+            when (type) {
+                DownloadType.SMALL -> "small"
+                DownloadType.BIG -> "big"
+            }
+        }"
+    if (!File(root).exists()) {
+        Logger.d("create: $root")
+        File(root).mkdir()
+    }
+    return "$root/$pokeID.png"
 }
 
 object JsonConverter {
@@ -123,6 +140,45 @@ object JsonConverter {
         encodeDefaults = false
         // 忽略json空值
         coerceInputValues = true
+    }
+}
+
+object AppCache {
+    val pokemonPathCache = ArrayList<PokemonImageCacheBean>()
+    val pokemonDetailCache = ArrayList<PokemonDetailBean>()
+
+    fun getPathItem(id: Int): PokemonImageCacheBean? {
+        for (item in pokemonPathCache) {
+            if (item.pokemonID == id) return item
+        }
+        return null
+    }
+
+    @WorkerThread
+    fun updatePathItem(item: PokemonImageCacheBean) {
+        val preItem = pokemonPathCache.filter { it.pokemonID == item.pokemonID }
+        if (preItem.isEmpty()) {
+            GlobalDataBase.database.pokeImageCacheDao().insert(item)
+        } else {
+            pokemonPathCache.remove(preItem[0])
+            GlobalDataBase.database.pokeImageCacheDao().update(item)
+        }
+        pokemonPathCache.add(item)
+    }
+
+    fun getDetailItem(id: Int): PokemonDetailBean? {
+        for (item in pokemonDetailCache) {
+            if (item.pokemon_id.toInt() == id) return item
+        }
+        return null
+    }
+
+    @WorkerThread
+    fun insertDetailItem(item: PokemonDetailBean) {
+        if (item !in pokemonDetailCache) {
+            pokemonDetailCache.add(item)
+            GlobalDataBase.database.pokeDetailCacheDao().insert(item)
+        }
     }
 }
 

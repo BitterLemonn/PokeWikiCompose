@@ -24,7 +24,7 @@ data class PokemonDetailBean(
     @ColumnInfo var is_star: Int,
     @ColumnInfo val pokemon_color: String,
     @ColumnInfo val pokemon_name: String,
-    @ColumnInfo val pokemon_type: ArrayList<String>,
+    @ColumnInfo val pokemon_type: List<String>,
 
     @ColumnInfo val poke_intro: PokemonIntroBean,
     @ColumnInfo val poke_stat: PokemonStateBean,

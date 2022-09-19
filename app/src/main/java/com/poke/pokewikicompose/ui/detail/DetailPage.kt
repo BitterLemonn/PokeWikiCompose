@@ -1,5 +1,8 @@
 package com.poke.pokewikicompose.ui.detail
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -39,10 +42,12 @@ import com.poke.pokewikicompose.ui.widget.BottomNaviBar
 import com.poke.pokewikicompose.ui.widget.NaviItem
 import com.poke.pokewikicompose.ui.widget.PokemonTag
 import com.poke.pokewikicompose.ui.widget.WarpLoadingDialog
+import com.poke.pokewikicompose.utils.AppCache
 import com.poke.pokewikicompose.utils.getColorByText
 import com.poke.pokewikicompose.utils.getPokemonColor
 import com.zj.mvi.core.observeEvent
 import kotlinx.coroutines.launch
+import java.io.File
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
@@ -57,6 +62,9 @@ fun DetailPage(
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
 
+    var imageCacheItem by remember { mutableStateOf(AppCache.getPathItem(pokemonID)) }
+    val detailCacheItem = AppCache.getDetailItem(pokemonID)
+
     var isLike by remember { mutableStateOf(false) }
     var isInit by remember { mutableStateOf(false) }
     var isShowLoading by remember { mutableStateOf(false) }
@@ -66,9 +74,8 @@ fun DetailPage(
     var curPage by remember { mutableStateOf(pageStates.currentPage) }
 
     LaunchedEffect(pokeDetail) {
-        if (pokeDetail.pokemon_type.size != 0) {
-            val detail = pokeDetail
-            isLike = detail.is_star == 1
+        if (pokeDetail.pokemon_type.isNotEmpty()) {
+            isLike = pokeDetail.is_star == 1
         }
     }
 
@@ -109,7 +116,12 @@ fun DetailPage(
                 }
             }
         }
-        viewModel.dispatch(DetailPageViewActions.GetDetailWithID(pokemonID))
+        if (detailCacheItem == null)
+            viewModel.dispatch(DetailPageViewActions.GetDetailWithID(pokemonID))
+        else {
+            pokeDetail = detailCacheItem
+            isInit = true
+        }
     }
     rememberSystemUiController().setSystemBarsColor(
         getPokemonColor(pokeDetail.pokemon_color),
@@ -197,7 +209,11 @@ fun DetailPage(
             elevation = 20.dp,
             color = BackGround
         ) {
-            if (isInit) {
+            AnimatedVisibility(
+                visible = isInit,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
                 // 标签
                 Column(
                     modifier = Modifier
@@ -252,14 +268,21 @@ fun DetailPage(
                     state = pageStates,
                     verticalAlignment = Alignment.Top
                 ) { page ->
-                    if (isInit) {
+                    AnimatedVisibility(
+                        visible = isInit,
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
                         curPage = pageStates.currentPage
                         when (page) {
                             0 -> InfoPage(
                                 getColorByText(pokeDetail.pokemon_type[0]),
                                 pokeDetail
                             ) {
-                                viewModel.dispatch(DetailPageViewActions.GetDetailWithID(it))
+                                AppCache.getDetailItem(it)?.let { detail ->
+                                    pokeDetail = detail
+                                    imageCacheItem = AppCache.getPathItem(it)
+                                } ?: viewModel.dispatch(DetailPageViewActions.GetDetailWithID(it))
                             }
                             1 -> StatePage(
                                 pokeDetail.poke_stat
@@ -290,28 +313,30 @@ fun DetailPage(
             }
         }
         // 宝可梦图片
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 32.dp),
+            contentAlignment = Alignment.TopCenter
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 32.dp),
-                contentAlignment = Alignment.Center
+            Image(
+                modifier = Modifier.size(170.dp),
+                painter = painterResource(R.drawable.pokemon_detail_bg),
+                contentDescription = "detail background"
+            )
+            AnimatedVisibility(
+                visible = isInit,
+                enter = fadeIn(),
+                exit = fadeOut()
             ) {
-                Image(
-                    modifier = Modifier.size(170.dp),
-                    painter = painterResource(R.drawable.pokemon_detail_bg),
-                    contentDescription = "detail background"
+                AsyncImage(
+                    modifier = Modifier
+                        .size(150.dp),
+                    model = imageCacheItem?.let {
+                        it.bigPath?.let { path -> File(path) } ?: pokeDetail.img_url
+                    } ?: pokeDetail.img_url,
+                    contentDescription = "pokemon image"
                 )
-                if (isInit)
-                    AsyncImage(
-                        modifier = Modifier
-                            .size(150.dp),
-                        model = pokeDetail.img_url,
-                        contentDescription = "pokemon image"
-                    )
             }
         }
 

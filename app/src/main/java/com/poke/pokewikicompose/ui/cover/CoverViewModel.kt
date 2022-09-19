@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.orhanobut.logger.Logger
 import com.poke.pokewikicompose.dataBase.GlobalDataBase
+import com.poke.pokewikicompose.utils.AppCache
 import com.poke.pokewikicompose.utils.AppContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -27,11 +28,22 @@ class CoverViewModel : ViewModel() {
                         _viewEvent.send(CoverViewEvent.GetLoginInfo)
                         AppContext.userData = it[0]
 
+                        // 读取用户个人设定
                         val setting =
                             GlobalDataBase.database.localSettingDao().getLocalSettingWithUserID(
                                 userID = it[0].userId
                             )
                         AppContext.localSetting = setting!!
+                        // 读取缓存图片
+                        val pathCache = GlobalDataBase.database.pokeImageCacheDao().getAllCache()
+                        pathCache?.let { paths ->
+                            AppCache.pokemonPathCache.addAll(paths)
+                        }
+                        // 读取缓存详细页
+                        val detailCache = GlobalDataBase.database.pokeDetailCacheDao().getAll()
+                        detailCache?.let { detail ->
+                            AppCache.pokemonDetailCache.addAll(detail)
+                        }
                     }
                 }
                 _viewEvent.send(CoverViewEvent.OverProcess)

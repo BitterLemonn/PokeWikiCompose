@@ -19,6 +19,9 @@ import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import com.poke.pokewikicompose.dataBase.data.bean.PokemonSearchBean
 import com.poke.pokewikicompose.ui.theme.PokeBallRed
+import com.poke.pokewikicompose.utils.AppCache
+import com.poke.pokewikicompose.utils.AppContext
+import java.io.File
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
@@ -28,6 +31,8 @@ fun PokemonSearchCard(
         Log.d("TAG", "PokemonSearchCard: 点击")
     }
 ) {
+    val imageCacheItem = AppCache.getPathItem(item.pokemon_id.toInt())
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -63,7 +68,9 @@ fun PokemonSearchCard(
                 ) {
                     SubcomposeAsyncImage(
                         modifier = Modifier.size(50.dp),
-                        model = item.img_path ?: item.img_url,
+                        model = imageCacheItem?.let {
+                            it.smallPath?.let { path -> File(path) } ?: item.img_url
+                        } ?: item.img_url,
                         contentDescription = "pokemon image"
                     ) {
                         val state = painter.state
@@ -117,8 +124,7 @@ private fun PokemonSearchCardPreview() {
             img_url = "",
             pokemon_id = "3",
             pokemon_type = typeArrayList,
-            pokemon_name = "妙蛙花",
-            img_path = ""
+            pokemon_name = "妙蛙花"
         )
     )
 }

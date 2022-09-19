@@ -93,8 +93,7 @@ fun PokemonSearchDetailCardPreview() {
             img_url = "",
             pokemon_id = "3",
             pokemon_type = typeArrayList,
-            pokemon_name = "妙蛙花",
-            img_path = ""
+            pokemon_name = "妙蛙花"
         )
     ) {}
 }

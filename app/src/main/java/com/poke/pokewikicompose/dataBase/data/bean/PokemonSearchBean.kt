@@ -15,7 +15,6 @@ import kotlinx.serialization.Serializable
 @Parcelize
 data class PokemonSearchBean(
     @PrimaryKey val pokemon_id: String,
-    @ColumnInfo val img_path: String? = null,
     @ColumnInfo val img_url: String,
     @ColumnInfo val pokemon_name: String,
     @ColumnInfo val pokemon_type: List<String>

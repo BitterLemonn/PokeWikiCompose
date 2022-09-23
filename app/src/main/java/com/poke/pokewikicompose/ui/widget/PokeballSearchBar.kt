@@ -33,7 +33,7 @@ fun PokeBallSearchBar(
         onClick = onClick ?: {}
     ) {
         Row(
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier,
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextField(

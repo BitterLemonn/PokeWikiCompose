@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.annotation.ExperimentalCoilApi
+import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
@@ -23,18 +24,16 @@ import com.poke.pokewikicompose.utils.AppCache
 import com.poke.pokewikicompose.utils.AppContext
 import java.io.File
 
-@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun PokemonSearchCard(
+    modifier: Modifier = Modifier,
     item: PokemonSearchBean,
-    onClick: () -> Unit = {
-        Log.d("TAG", "PokemonSearchCard: 点击")
-    }
+    onClick: () -> Unit
 ) {
     val imageCacheItem = AppCache.getPathItem(item.pokemon_id.toInt())
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(60.dp),
         shape = RoundedCornerShape(10.dp),
@@ -66,23 +65,13 @@ fun PokemonSearchCard(
                         .align(Alignment.CenterVertically)
                         .weight(1f)
                 ) {
-                    SubcomposeAsyncImage(
+                    AsyncImage(
                         modifier = Modifier.size(50.dp),
                         model = imageCacheItem?.let {
                             it.smallPath?.let { path -> File(path) } ?: item.img_url
                         } ?: item.img_url,
                         contentDescription = "pokemon image"
-                    ) {
-                        val state = painter.state
-                        if (state is AsyncImagePainter.State.Loading || state is AsyncImagePainter.State.Error) {
-                            CircularProgressIndicator(
-                                color = PokeBallRed,
-                                strokeWidth = 3.dp
-                            )
-                        } else {
-                            SubcomposeAsyncImageContent()
-                        }
-                    }
+                    )
                     Spacer(modifier = Modifier.width(15.dp))
                     Text(
                         modifier = Modifier.align(Alignment.CenterVertically),
@@ -120,11 +109,11 @@ private fun PokemonSearchCardPreview() {
     typeArrayList.add("草")
     typeArrayList.add("毒")
     PokemonSearchCard(
-        PokemonSearchBean(
+        item = PokemonSearchBean(
             img_url = "",
             pokemon_id = "3",
             pokemon_type = typeArrayList,
             pokemon_name = "妙蛙花"
         )
-    )
+    ){}
 }

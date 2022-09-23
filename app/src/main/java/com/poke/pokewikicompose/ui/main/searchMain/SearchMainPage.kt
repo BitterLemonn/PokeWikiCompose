@@ -1,5 +1,6 @@
 package com.poke.pokewikicompose.ui.main.searchMain
 
+import android.view.MotionEvent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,9 +15,13 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -33,9 +38,7 @@ import com.poke.pokewikicompose.ui.widget.LazyLoadMoreColumn
 import com.poke.pokewikicompose.ui.widget.PokeBallSearchBar
 import com.poke.pokewikicompose.ui.widget.PokemonSearchCard
 import com.poke.pokewikicompose.ui.widget.WarpLoadingDialog
-import com.poke.pokewikicompose.utils.AppContext
 import com.poke.pokewikicompose.utils.DETAIL_PAGE
-import com.poke.pokewikicompose.utils.SEARCH_MAIN_PAGE
 import com.poke.pokewikicompose.utils.SEARCH_PAGE
 import com.zj.mvi.core.observeEvent
 import com.zj.mvi.core.observeState
@@ -45,7 +48,7 @@ import me.onebone.toolbar.ExperimentalToolbarApi
 import me.onebone.toolbar.ScrollStrategy
 import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 
-@OptIn(ExperimentalToolbarApi::class)
+@OptIn(ExperimentalToolbarApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun SearchMainPage(
     navCtrl: NavController,
@@ -54,8 +57,12 @@ fun SearchMainPage(
 ) {
     val coroutineState = rememberCoroutineScope()
     val collapsingState = rememberCollapsingToolbarScaffoldState()
-    val progress = collapsingState.toolbarState.progress
+    val toolbarState by remember { derivedStateOf { collapsingState.toolbarState } }
     val viewStates = viewModel.viewStates
+
+    var isExpand by rememberSaveable { mutableStateOf(true) }
+    var isScrolling by remember { mutableStateOf(false) }
+    var isChange by remember { mutableStateOf(false) }
 
     var isFirstInit by rememberSaveable { mutableStateOf(true) }
     var loading by remember { mutableStateOf(false) }
@@ -65,17 +72,20 @@ fun SearchMainPage(
         restore = { it.toMutableList() }
     )
     val dataList = rememberSaveable(saver = listSaver) { mutableStateListOf() }
-
-    val lazyState = rememberLazyListState()
     val lifecycleOwner = LocalLifecycleOwner.current
-    var nowSeenIndex by rememberSaveable { mutableStateOf(0) }
-    var nowSeenOffset by rememberSaveable { mutableStateOf(0) }
+
+    val minHeight = with(LocalDensity.current) { 80.dp.roundToPx().toFloat() }
+    val maxHeight = with(LocalDensity.current) { 180.dp.roundToPx().toFloat() }
 
     rememberSystemUiController().setStatusBarColor(
         PokeBallRed,
         darkIcons = MaterialTheme.colors.isLight
     )
+    LaunchedEffect(toolbarState.height) {
+        isChange = true
+    }
     LaunchedEffect(Unit) {
+        isChange = false
         viewModel.viewEvents.observeEvent(lifecycleOwner) {
             when (it) {
                 is SearchMainViewEvent.ShowLoadingDialog -> loading = true
@@ -93,26 +103,42 @@ fun SearchMainPage(
                     dataList.addAll(it)
             }
         }
-        // 移动到指定位置
-        coroutineState.launch {
-            lazyState.scrollToItem(nowSeenIndex, nowSeenOffset)
-        }
         if (isFirstInit) {
             viewModel.dispatch(SearchMainViewAction.GetData)
             isFirstInit = false
         }
     }
 
-    DisposableEffect(Unit) {
-        onDispose {
-            nowSeenIndex = lazyState.firstVisibleItemIndex
-            nowSeenOffset = lazyState.firstVisibleItemScrollOffset
-        }
-    }
-
     CollapsingToolbarScaffold(
-        modifier = Modifier.fillMaxSize(),
         state = collapsingState,
+        modifier = Modifier.fillMaxSize()
+            .motionEventSpy {
+                Logger.d("motion: ${it.action}")
+                if (
+                    it.action == MotionEvent.ACTION_UP ||
+                    it.action == MotionEvent.ACTION_CANCEL
+                ) {
+                    isChange = false
+                    coroutineState.launch {
+                        isScrolling = false
+                        isExpand = if (toolbarState.height > maxHeight * 3 / 4) {
+                            toolbarState.scroll {
+                                scrollBy(maxHeight - toolbarState.height)
+                            }
+                            true
+                        } else {
+                            toolbarState.scroll {
+                                scrollBy(minHeight - toolbarState.height)
+                            }
+                            false
+                        }
+                    }
+                    Logger.d("isExpand: $isExpand")
+                } else if (it.action == MotionEvent.ACTION_MOVE) {
+                    isScrolling = true
+                    Logger.d("is ")
+                }
+            },
         scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
         toolbar = {
             Box(
@@ -120,79 +146,75 @@ fun SearchMainPage(
                     .fillMaxWidth()
                     .height(180.dp)
                     .pin()
-                    .background(
-                        PokeBallRed,
-                        shape = RoundedCornerShape(
-                            bottomEnd = (15 * progress).dp,
-                            bottomStart = (15 * progress).dp
-                        )
-                    )
+                    .clip(RoundedCornerShape(bottomEnd = 15.dp, bottomStart = 15.dp))
+                    .background(color = PokeBallRed)
             )
-            Box(
-                modifier = Modifier
-                    .road(Alignment.CenterStart, Alignment.TopCenter)
-                    .size(
-                        width = (90 + (190 - 90) * progress +
-                                (20 - 20 * progress)).dp,
-                        height = (60 + (65 - 30) * progress).dp
+            if (isScrolling)
+                Box(modifier = Modifier.height(80.dp).background(Color.Transparent))
+            if (!isChange || !isScrolling) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            top = 10.dp,
+                            bottom = 10.dp,
+                            start = if (isExpand) 0.dp else 10.dp
+                        ),
+                    contentAlignment = if (isExpand) Alignment.Center else Alignment.CenterStart
+                ) {
+                    Image(
+                        modifier = Modifier.size(
+                            width = if (isExpand) 190.dp else 110.dp,
+                            height = if (isExpand) 95.dp else 60.dp
+                        ),
+                        painter = painterResource(R.drawable.logo),
+                        contentDescription = "logo",
+                        contentScale = ContentScale.Fit
                     )
-                    .padding(
-                        top = 15.dp,
-                        bottom = 15.dp,
-                        start = (20 - 20 * progress).dp
-                    )
-            ) {
-                Image(
-                    modifier = Modifier.fillMaxSize(),
-                    painter = painterResource(R.drawable.logo),
-                    contentDescription = "logo",
-                    contentScale = ContentScale.Fit
-                )
-            }
+                }
 
-            Box(
-                modifier = Modifier
-                    .road(Alignment.CenterEnd, Alignment.TopCenter)
-                    .offset(y = (100 * progress).dp)
-                    .padding(horizontal = 20.dp, vertical = 10.dp)
-                    .height((60 + 10 * progress).dp)
-                    .width((222 + (268 - 222) * progress + 20).dp)
-            ) {
-                PokeBallSearchBar(
-                    value = "",
-                    onValueChange = {},
-                    onClick = {
-                        navCtrl.navigate(SEARCH_PAGE)
+                Box(
+                    modifier = Modifier
+                        .offset(y = if (isExpand) 100.dp else 0.dp)
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 10.dp),
+                    contentAlignment = if (isExpand) Alignment.Center else Alignment.CenterEnd
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .height(if (isExpand) 70.dp else 60.dp)
+                            .width(if (isExpand) 288.dp else 242.dp)
+                    ) {
+                        PokeBallSearchBar(
+                            value = "",
+                            onValueChange = {},
+                            onClick = {
+                                navCtrl.navigate(SEARCH_PAGE)
+                            }
+                        )
                     }
-                )
+                }
             }
-
         }
     ) {
-        if (loading)
-            WarpLoadingDialog(text = "正在加载", backgroundAlpha = 0.1f)
         LazyLoadMoreColumn(
             loadState = loading,
-            onLoad = {
-                viewModel.dispatch(SearchMainViewAction.GetData)
-            }
+            onLoad = { viewModel.dispatch(SearchMainViewAction.GetData) }
         ) {
             LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth(),
                 contentPadding = PaddingValues(vertical = 10.dp, horizontal = 5.dp),
                 verticalArrangement = Arrangement.SpaceEvenly,
-                state = lazyState
+                state = rememberLazyListState()
             ) {
-                if (dataList.size > 0) {
-                    items(items = dataList) {
-                        PokemonSearchCard(it) {
-                            nowSeenIndex = lazyState.firstVisibleItemIndex
-                            nowSeenOffset = lazyState.firstVisibleItemScrollOffset
-                            navCtrl.navigate("$DETAIL_PAGE/${it.pokemon_id}")
-                        }
-                        Spacer(Modifier.height(10.dp))
+                items(items = dataList) {
+                    PokemonSearchCard(item = it) {
+                        navCtrl.navigate("$DETAIL_PAGE/${it.pokemon_id}")
                     }
-                } else if (dataList.size == 0 && !loading)
+                    Spacer(Modifier.height(10.dp))
+                }
+                if (dataList.isEmpty() && !loading)
                     item {
                         Text(
                             text = "暂无相关搜索结果~",
@@ -208,6 +230,7 @@ fun SearchMainPage(
 
             }
         }
-
+        if (loading)
+            WarpLoadingDialog(text = "正在加载", backgroundAlpha = 0.1f)
     }
 }

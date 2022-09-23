@@ -67,7 +67,7 @@ dependencies {
     // compose导航
     implementation "androidx.navigation:navigation-compose:2.5.1"
     // 折叠标题栏
-    implementation("me.onebone:toolbar-compose:2.3.4")
+    implementation "me.onebone:toolbar-compose:2.3.4"
     //retrofit网络请求
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0"
